@@ -16,8 +16,8 @@ class platina_tracker extends CModule {
     public $MODULE_NAME = 'Трекер для Convead';
     public $MODULE_DESCRIPTION = 'Трекер для Convead';
     public $MODULE_GROUP_RIGHTS = 'N';
-    public $PARTNER_NAME = "Convead";
-    public $PARTNER_URI = "http://convead.io";
+    public $PARTNER_NAME = "Platina";
+    public $PARTNER_URI = "http://ptweb.ru/";
 
     function platina_tracker() {
         $arModuleVersion = array();
@@ -25,6 +25,10 @@ class platina_tracker extends CModule {
         $path = str_replace("\\", "/", __FILE__);
         $path = substr($path, 0, strlen($path) - strlen("/index.php"));
         include($path . "/version.php");
+
+        $this->MODULE_ID = 'platina.tracker';
+        $this->PARTNER_NAME = "Convead";
+        $this->PARTNER_URI = "http://convead.io";
 
         $this->MODULE_VERSION = $arModuleVersion["VERSION"] || $this->MODULE_VERSION;
         $this->MODULE_VERSION_DATE = $arModuleVersion["VERSION_DATE"] || $this->MODULE_VERSION_DATE;
@@ -37,6 +41,7 @@ class platina_tracker extends CModule {
         RegisterModuleDependences("sale", "OnBeforeBasketDelete", $this->MODULE_ID, "cConveadTracker", "removeFromCart", "100");
         RegisterModuleDependences("sale", "OnOrderAdd", $this->MODULE_ID, "cConveadTracker", "order", "100");
         $this->InstallFiles();
+        $this->InstallDB();
     }
 
     public function DoUninstall() {
@@ -59,6 +64,11 @@ class platina_tracker extends CModule {
         CopyDirFiles(
                 $_SERVER["DOCUMENT_ROOT"] . "/bitrix/modules/platina.tracker/install/components/bitrix/catalog/templates/.default/bitrix/catalog.element/.default/component_epilog.php", $_SERVER["DOCUMENT_ROOT"] . "/bitrix/components/bitrix/catalog/templates/.default/bitrix/catalog.element/.default/component_epilog.php", true
         );
+        return true;
+    }
+
+    function InstallDB () {
+        
         return true;
     }
 
