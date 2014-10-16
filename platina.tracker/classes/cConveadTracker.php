@@ -165,4 +165,53 @@ class cConveadTracker {
         return true;
     }
 
+    static function head() {
+        $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
+        if(!$api_key)
+            return;
+
+        global $USER;
+        global $APPLICATION;
+
+        
+        
+        $guest_uid = self::getUid();
+        $visitor_info = false;
+        $visitor_uid = false;
+        if($USER && $USER->GetID() && $USER->GetID() > 0 && $visitor_info = self::getVisitorInfo($USER->GetID())){
+            $visitor_uid = $USER->GetID();
+        }
+
+        $vi = "";
+        if($visitor_info){
+            foreach($visitor_info as $key=>$val){
+                $vi.="\n".$key.": '".$val."',";
+            }
+        }
+
+        $head = "<!-- Convead Widget -->
+                    <script>
+                    window.ConveadSettings = {
+                        /* Use only [0-9a-z-] characters for visitor uid!*/
+                        ". ($visitor_uid ? "visitor_uid: '$visitor_uid'," : "") ."
+                        visitor_info: {
+                            $vi
+                        }, 
+                        app_key: \"$api_key\"
+
+                        /* For more information on widget configuration please see:
+                           http://convead.uservoice.com/knowledgebase/articles/344831-how-to-embed-a-tracking-code-into-your-websites
+                        */
+                    };
+
+                    (function(w,d,c){w[c]=w[c]||function(){(w[c].q=w[c].q||[]).push(arguments)};var ts = (+new Date()/86400000|0)*86400;var s = d.createElement('script');s.type = 'text/javascript';s.async = true;s.src = 'http://tracker.staging.convead.io/widgets/'+ts+'/widget-2a5ba2a2331e9b5ea257d6a716a2683a.js';var x = d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s, x);})(window,document,'convead');
+                    </script>
+                    <!-- /Convead Widget -->";
+        $APPLICATION->AddHeadString($head,true);
+       
+       
+        
+        return true;
+    }
+
 }

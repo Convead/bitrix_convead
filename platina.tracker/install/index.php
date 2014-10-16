@@ -43,6 +43,7 @@ class platina_tracker extends CModule {
         RegisterModuleDependences("sale", "OnBeforeBasketDelete", $this->MODULE_ID, "cConveadTracker", "removeFromCart", "100");
         RegisterModuleDependences("sale", "OnOrderAdd", $this->MODULE_ID, "cConveadTracker", "order", "100");
         RegisterModuleDependences("main", "OnAfterEpilog", $this->MODULE_ID, "cConveadTracker", "view", "100");
+        RegisterModuleDependences("main", "OnBeforeProlog", $this->MODULE_ID, "cConveadTracker", "head", "100");
         $this->InstallFiles();
         $this->InstallDB();
     }
@@ -53,6 +54,7 @@ class platina_tracker extends CModule {
         UnRegisterModuleDependences("sale", "OnBeforeBasketDelete", $this->MODULE_ID, "cConveadTracker", "removeFromCart");
         UnRegisterModuleDependences("sale", "OnOrderAdd", $this->MODULE_ID, "cConveadTracker", "order");
         UnRegisterModuleDependences("main", "OnAfterEpilog", $this->MODULE_ID, "cConveadTracker", "view");
+        UnRegisterModuleDependences("main", "OnBeforeProlog", $this->MODULE_ID, "cConveadTracker", "head");
         $this->UnInstallFiles();
         UnRegisterModule($this->MODULE_ID);
     }
