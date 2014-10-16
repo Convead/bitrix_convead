@@ -159,4 +159,20 @@ class ConveadTracker {
             return $this->brovser->error;
     }
 
+    public function view($url, $title) {
+        $post = $this->getDefaultPost();
+        $post["type"] = "link";
+        $post["title"] = $title;
+        $post["url"] = "http://" . $this->url . $url;
+        $post["path"] = $url;
+        
+        $post = json_encode($post);
+
+
+        if ($this->brovser->get($this->api_page, $post) === true)
+            return true;
+        else
+            return $this->brovser->error;
+    }
+
 }

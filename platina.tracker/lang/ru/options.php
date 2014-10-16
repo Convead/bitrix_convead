@@ -1,13 +1,13 @@
 <?php
-$MESS['MAKE_REDIRECT_NO'] = "ÐÐµÑ‚";
-$MESS['MAKE_REDIRECT_YES'] = "Ð”Ð°";
+$MESS['MAKE_REDIRECT_NO'] = "Íåò";
+$MESS['MAKE_REDIRECT_YES'] = "Äà";
 
-$MESS['MAKE_REDIRECT'] = "ÐŸÐµÑ€ÐµÐ½Ð°Ð¿Ñ€Ð°Ð²Ð»ÑÑ‚ÑŒ Ð»Ð¸ Ð¿Ð¾ÑÐµÑ‚Ð¸Ñ‚ÐµÐ»Ñ Ð½Ð° Ð¾Ñ‚Ð´ÐµÐ»ÑŒÐ½ÑƒÑŽ \"thank you\" ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñƒ";
-$MESS['REDIRECT_URL'] = "ÐÐ´Ñ€ÐµÑ \"thank you\" ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñ‹";
-$MESS['TRACKER_CODE'] = "Ð£Ð½Ð¸ÐºÐ°Ð»ÑŒÐ½Ñ‹Ð¹ ÐºÐ¾Ð´ Ñ‚Ñ€ÐµÐºÐµÑ€Ð°";
-$MESS['OPTIONS_RESTORED'] = "Ð—Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ ÑÐ±Ñ€Ð¾ÑˆÐµÐ½Ñ‹";
-$MESS['OPTIONS_SAVED'] = "Ð—Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ ÑÐ¾Ñ…Ñ€Ð°Ð½ÐµÐ½Ñ‹ ÑƒÑÐ¿ÐµÑˆÐ½Ð¾";
+$MESS['MAKE_REDIRECT'] = "Ïåðåíàïðàâëÿòü ëè ïîñåòèòåëÿ íà îòäåëüíóþ \"thank you\" ñòðàíèöó";
+$MESS['REDIRECT_URL'] = "Àäðåñ \"thank you\" ñòðàíèöû";
+$MESS['TRACKER_CODE'] = "Óíèêàëüíûé êîä òðåêåðà";
+$MESS['OPTIONS_RESTORED'] = "Çíà÷åíèÿ ñáðîøåíû";
+$MESS['OPTIONS_SAVED'] = "Çíà÷åíèÿ ñîõðàíåíû óñïåøíî";
 
-$MESS['ERROR_TRACKER_CODE_EMPTY'] = "Ð—Ð½Ð°Ñ‡ÐµÐ½Ð¸Ðµ ÑƒÐ½Ð¸ÐºÐ°Ð»ÑŒÐ½Ð¾Ð³Ð¾ ÐºÐ¾Ð´Ð° Ñ‚Ñ€ÐµÐºÐµÑ€Ð° Ð´Ð¾Ð»Ð¶Ð½Ð¾ Ð±Ñ‹Ñ‚ÑŒ Ð·Ð°Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¾";
-$MESS['ERROR_TRACKER_REDIRECT_URL'] = "ÐÐ´Ñ€ÐµÑ \"thank you\" ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñ‹ Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð±Ñ‹Ñ‚ÑŒ Ð·Ð°Ð¿Ð¾Ð»Ð½ÐµÐ½";
+$MESS['ERROR_TRACKER_CODE_EMPTY'] = "Çíà÷åíèå óíèêàëüíîãî êîäà òðåêåðà äîëæíî áûòü çàïîëíåíî";
+$MESS['ERROR_TRACKER_REDIRECT_URL'] = "Àäðåñ \"thank you\" ñòðàíèöû äîëæåí áûòü çàïîëíåí";
 ?>

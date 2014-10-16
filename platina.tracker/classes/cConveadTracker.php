@@ -44,7 +44,7 @@ class cConveadTracker {
         $product_url = "http://" . SITE_SERVER_NAME . $APPLICATION->GetCurPage();
 
         $result = $tracker->eventProductView($product_id, $product_name, $product_url);
-        echo $result."-------LLLL";
+        
         return true;
     }
 
@@ -131,6 +131,36 @@ class cConveadTracker {
         $price = $arFields["PRICE"];
 
         $result = $tracker->eventOrder($order_id, $price, $items);
+        
+        return true;
+    }
+
+    static function view() {
+        $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
+        if(!$api_key)
+            return;
+
+        global $USER;
+        global $APPLICATION;
+
+        
+        
+        
+        $guest_uid = self::getUid();
+        $visitor_info = false;
+        $visitor_uid = false;
+        if($USER->GetID() && $USER->GetID() > 0 && $visitor_info = self::getVisitorInfo($USER->GetID())){
+            $visitor_uid = $USER->GetID();
+        }
+
+        $title = $APPLICATION->GetTitle();
+        $url = $APPLICATION->GetCurUri();
+
+        $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
+
+        $result = $tracker->view($url, $title);
+       
+       
         
         return true;
     }

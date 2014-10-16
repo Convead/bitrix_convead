@@ -8,16 +8,18 @@ if (class_exists('platina_tracker')) {
     return;
 }
 
+
+
 class platina_tracker extends CModule {
 
-    public $MODULE_ID = 'platina.tracker';
-    public $MODULE_VERSION = '0.0.1';
-    public $MODULE_VERSION_DATE = '2014-10-01 16:23:14';
-    public $MODULE_NAME = 'Ð¢Ñ€ÐµÐºÐµÑ€ Ð´Ð»Ñ Convead';
-    public $MODULE_DESCRIPTION = 'Ð¢Ñ€ÐµÐºÐµÑ€ Ð´Ð»Ñ Convead';
-    public $MODULE_GROUP_RIGHTS = 'N';
-    public $PARTNER_NAME = "Platina";
-    public $PARTNER_URI = "http://ptweb.ru/";
+    var $MODULE_ID = 'platina.tracker';
+    var $MODULE_VERSION = '0.0.1';
+    var $MODULE_VERSION_DATE = '2014-10-01 16:23:14';
+    var $MODULE_NAME = 'Òðåêåð äëÿ Convead';
+    var $MODULE_DESCRIPTION = 'Òðåêåð äëÿ Convead';
+    var $MODULE_GROUP_RIGHTS = 'N';
+    var $PARTNER_NAME = "Platina";
+    var $PARTNER_URI = "http://ptweb.ru/";
 
     function platina_tracker() {
         $arModuleVersion = array();
@@ -27,8 +29,8 @@ class platina_tracker extends CModule {
         include($path . "/version.php");
 
         $this->MODULE_ID = 'platina.tracker';
-        $this->PARTNER_NAME = "Convead";
-        $this->PARTNER_URI = "http://convead.io";
+        $this->PARTNER_NAME = "Platina";
+        $this->PARTNER_URI = "http://ptweb.ru/";
 
         $this->MODULE_VERSION = $arModuleVersion["VERSION"] || $this->MODULE_VERSION;
         $this->MODULE_VERSION_DATE = $arModuleVersion["VERSION_DATE"] || $this->MODULE_VERSION_DATE;
@@ -40,6 +42,7 @@ class platina_tracker extends CModule {
         RegisterModuleDependences("sale", "OnBeforeBasketAdd", $this->MODULE_ID, "cConveadTracker", "addToCart", "100");
         RegisterModuleDependences("sale", "OnBeforeBasketDelete", $this->MODULE_ID, "cConveadTracker", "removeFromCart", "100");
         RegisterModuleDependences("sale", "OnOrderAdd", $this->MODULE_ID, "cConveadTracker", "order", "100");
+        RegisterModuleDependences("main", "OnAfterEpilog", $this->MODULE_ID, "cConveadTracker", "view", "100");
         $this->InstallFiles();
         $this->InstallDB();
     }
@@ -49,6 +52,7 @@ class platina_tracker extends CModule {
         UnRegisterModuleDependences("sale", "OnBeforeBasketAdd", $this->MODULE_ID, "cConveadTracker", "addToCart");
         UnRegisterModuleDependences("sale", "OnBeforeBasketDelete", $this->MODULE_ID, "cConveadTracker", "removeFromCart");
         UnRegisterModuleDependences("sale", "OnOrderAdd", $this->MODULE_ID, "cConveadTracker", "order");
+        UnRegisterModuleDependences("main", "OnAfterEpilog", $this->MODULE_ID, "cConveadTracker", "view");
         $this->UnInstallFiles();
         UnRegisterModule($this->MODULE_ID);
     }
