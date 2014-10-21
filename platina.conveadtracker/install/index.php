@@ -1,4 +1,4 @@
-<?php
+ï»¿<?php
 
 use Bitrix\Main\Localization\Loc;
 
@@ -15,8 +15,8 @@ class platina_conveadtracker extends CModule {
     var $MODULE_ID = 'platina.conveadtracker';
     var $MODULE_VERSION = '0.0.1';
     var $MODULE_VERSION_DATE = '2014-10-01 16:23:14';
-    var $MODULE_NAME = 'Òðåêåð äëÿ Convead';
-    var $MODULE_DESCRIPTION = 'Òðåêåð äëÿ Convead';
+    var $MODULE_NAME = 'Ð¢Ñ€ÐµÐºÐµÑ€ Ð´Ð»Ñ Convead';
+    var $MODULE_DESCRIPTION = 'Ð¢Ñ€ÐµÐºÐµÑ€ Ð´Ð»Ñ Convead';
     var $MODULE_GROUP_RIGHTS = 'N';
     var $PARTNER_NAME = "Platina";
     var $PARTNER_URI = "http://ptweb.ru/";
