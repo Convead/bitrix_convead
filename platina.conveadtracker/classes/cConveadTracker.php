@@ -78,14 +78,25 @@ class cConveadTracker {
         if (!$api_key)
             return;
 
-
+        if($arFields && !isset($arFields["FUSER_ID"]) && !isset($arFields["DELAY"])){//just viewving
+            
+            return;
+        }
+        if($arFields && isset($arFields["ORDER_ID"])){//оформление заказа
+            
+            return;
+        }
+        
+        
+        
         $basket = CSaleBasket::GetByID($id);
+        
         $user_id = $basket["FUSER_ID"];
         $items = array();
         $orders = CSaleBasket::GetList(
                         array(), array(
                     "FUSER_ID" => $basket["FUSER_ID"],
-                    "LID" => SITE_ID,
+                    //"LID" => SITE_ID,
                     "ORDER_ID" => "NULL"
                         ), false, false, array()
         );
@@ -102,8 +113,11 @@ class cConveadTracker {
             $items[$i . ""] = $item;
             $i++;
         }
-
-
+        
+        if(count($items) == 0)
+            return;
+        
+        
         $guest_uid = self::getUid();
         $visitor_uid = false;
         $visitor_info = false;

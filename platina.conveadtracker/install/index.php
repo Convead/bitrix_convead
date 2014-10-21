@@ -1,4 +1,4 @@
-ï»¿<?php
+<?php
 
 use Bitrix\Main\Localization\Loc;
 
@@ -15,8 +15,8 @@ class platina_conveadtracker extends CModule {
     var $MODULE_ID = 'platina.conveadtracker';
     var $MODULE_VERSION = '0.0.1';
     var $MODULE_VERSION_DATE = '2014-10-01 16:23:14';
-    var $MODULE_NAME = 'Ð¢Ñ€ÐµÐºÐµÑ€ Ð´Ð»Ñ Convead';
-    var $MODULE_DESCRIPTION = 'Ð¢Ñ€ÐµÐºÐµÑ€ Ð´Ð»Ñ Convead';
+    var $MODULE_NAME = 'Òðåêåð äëÿ Convead';
+    var $MODULE_DESCRIPTION = 'Òðåêåð äëÿ Convead';
     var $MODULE_GROUP_RIGHTS = 'N';
     var $PARTNER_NAME = "Platina";
     var $PARTNER_URI = "http://ptweb.ru/";
@@ -44,7 +44,7 @@ class platina_conveadtracker extends CModule {
         RegisterModuleDependences("sale", "OnBeforeOrderAdd", $this->MODULE_ID, "cConveadTracker", "order", "100");
         RegisterModuleDependences("main", "OnAfterEpilog", $this->MODULE_ID, "cConveadTracker", "view", "100");
         RegisterModuleDependences("main", "OnBeforeProlog", $this->MODULE_ID, "cConveadTracker", "head", "100");
-        //RegisterModuleDependences("sale", "OnBeforeBasketUpdateAfterCheck", $this->MODULE_ID, "cConveadTracker", "updateCart", "100");
+        RegisterModuleDependences("sale", "OnBasketUpdate", $this->MODULE_ID, "cConveadTracker", "updateCart", "100");
         
         $this->InstallFiles();
         $this->InstallDB();
@@ -57,7 +57,7 @@ class platina_conveadtracker extends CModule {
         UnRegisterModuleDependences("sale", "OnBeforeOrderAdd", $this->MODULE_ID, "cConveadTracker", "order");
         UnRegisterModuleDependences("main", "OnAfterEpilog", $this->MODULE_ID, "cConveadTracker", "view");
         UnRegisterModuleDependences("main", "OnBeforeProlog", $this->MODULE_ID, "cConveadTracker", "head");
-        //UnRegisterModuleDependences("sale", "OnBeforeBasketUpdateAfterCheck", $this->MODULE_ID, "cConveadTracker", "updateCart");
+        UnRegisterModuleDependences("sale", "OnBasketUpdate", $this->MODULE_ID, "cConveadTracker", "updateCart");
         $this->UnInstallFiles();
         UnRegisterModule($this->MODULE_ID);
     }
