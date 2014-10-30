@@ -3,7 +3,7 @@
 use Bitrix\Main\Localization\Loc;
 
 Loc::loadMessages(__FILE__);
-
+IncludeModuleLangFile(__FILE__);
 if (class_exists('platina_conveadtracker')) {
     return;
 }
@@ -15,8 +15,8 @@ class platina_conveadtracker extends CModule {
     var $MODULE_ID = 'platina.conveadtracker';
     var $MODULE_VERSION = '0.0.1';
     var $MODULE_VERSION_DATE = '2014-10-01 16:23:14';
-    var $MODULE_NAME = 'Трекер для Convead';
-    var $MODULE_DESCRIPTION = 'Трекер для Convead';
+    var $MODULE_NAME;
+    var $MODULE_DESCRIPTION;
     var $MODULE_GROUP_RIGHTS = 'N';
     var $PARTNER_NAME = "Platina";
     var $PARTNER_URI = "http://ptweb.ru/";
@@ -32,6 +32,8 @@ class platina_conveadtracker extends CModule {
         $this->PARTNER_NAME = "Platina";
         $this->PARTNER_URI = "http://ptweb.ru/";
 
+        $this->MODULE_NAME = GetMessage("convead_tracker.MODULE_NAME");
+        $this->MODULE_DESCRIPTION = GetMessage("convead_tracker.MODULE_DESCRIPTION");;
         $this->MODULE_VERSION = $arModuleVersion["VERSION"] || $this->MODULE_VERSION;
         $this->MODULE_VERSION_DATE = $arModuleVersion["VERSION_DATE"] || $this->MODULE_VERSION_DATE;
     }

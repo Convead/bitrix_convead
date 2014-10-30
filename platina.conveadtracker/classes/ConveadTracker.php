@@ -152,7 +152,7 @@ class ConveadTracker {
         $order_array && $properties["items"] = $order_array;
 
         $post["properties"] = $properties;
-        unset($post["domain"]);
+        //unset($post["domain"]);
         unset($post["url"]);
         unset($post["host"]);
         unset($post["path"]);

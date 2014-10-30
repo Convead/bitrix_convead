@@ -7,6 +7,7 @@ class cConveadTracker {
     static function getVisitorInfo($id) {
         if ($usr = CUser::GetByID($id)) {
             $user = $usr->Fetch();
+            
             $visitor_info = array();
             $user["NAME"] && $visitor_info["first_name"] = $user["NAME"];
             $user["LAST_NAME"] && $visitor_info["last_name"] = $user["LAST_NAME"];
@@ -21,7 +22,13 @@ class cConveadTracker {
     }
 
     static function getUid() {
-        return substr(md5($_SESSION["SESS_SESSION_ID"]), 1, 16);
+        if(isset($_COOKIE["convead_guest_uid"]))
+            return $_COOKIE["convead_guest_uid"];
+        else{
+            $uid = substr(md5($_SESSION["SESS_SESSION_ID"]), 1, 16);
+            @setcookie("convead_guest_uid", $uid, 0, "/");
+            return $uid;
+        }
     }
 
     static function productView($arResult, $user_id = false) {
@@ -107,15 +114,15 @@ class cConveadTracker {
                     continue;
             }
             $arProd = CCatalogSku::GetProductInfo($order["PRODUCT_ID"]);
-            $item["id"] = $arProd["ID"];
+            $item["product_id"] = $arProd["ID"];
             $item["qnt"] = $order["QUANTITY"];
             $item["price"] = $order["PRICE"];
             $items[$i . ""] = $item;
             $i++;
         }
         
-        if(count($items) == 0)
-            return;
+        //if(count($items) == 0)
+        //    return;
         
         
         $guest_uid = self::getUid();
@@ -165,9 +172,7 @@ class cConveadTracker {
         $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
         if (!$api_key)
             return;
-
-
-
+        
         $guest_uid = self::getUid();
         $visitor_uid = false;
         $visitor_info = false;
@@ -188,14 +193,14 @@ class cConveadTracker {
         $i = 0;
         while ($order = $orders->Fetch()) {
             $arProd = CCatalogSku::GetProductInfo($order["PRODUCT_ID"]);
-            $item["id"] = $arProd["ID"];
+            $item["product_id"] = $arProd["ID"];
             $item["qnt"] = $order["QUANTITY"];
             $item["price"] = $order["PRICE"];
             $items[$i . ""] = $item;
             $i++;
         }
 
-        $price = $arFields["PRICE"];
+        $price = $arFields["PRICE"] - (isset($arFields["PRICE_DELIVERY"])?$arFields["PRICE_DELIVERY"]:0 );
 
         $max_order = CSaleOrder::GetList(array("ID" => "DESC"), array(), false, false, array())->Fetch();
         $order_id = (isset($max_order["ID"]) ? $max_order["ID"] : 0) + 1;
@@ -205,6 +210,7 @@ class cConveadTracker {
     }
 
     static function view() {
+        return true;
         $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
         if (!$api_key)
             return;
@@ -227,9 +233,17 @@ class cConveadTracker {
         if (self::endsWith($url, "ajax.php?UPDATE_STATE")) {
             return;
         }
-        if(self::startsWith($url, "/bitrix/admin/")){
+        elseif(self::startsWith($url, "/bitrix/admin/")){
             return;
         }
+        elseif(self::contains($url, "/bitrix/tools/captcha.php")){
+            return;
+        }
+        elseif(self::contains($url, "bitrix/tools/autosave.php?bxsender=core_autosave")){
+            return;
+        }
+        
+        
         $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
 
         $result = $tracker->view($url, $title);
@@ -283,7 +297,7 @@ class cConveadTracker {
                         */
                     };
 
-                    (function(w,d,c){w[c]=w[c]||function(){(w[c].q=w[c].q||[]).push(arguments)};var ts = (+new Date()/86400000|0)*86400;var s = d.createElement('script');s.type = 'text/javascript';s.async = true;s.src = 'http://tracker.staging.convead.io/widgets/'+ts+'/widget-$api_key.js';var x = d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s, x);})(window,document,'convead');
+                    (function(w,d,c){w[c]=w[c]||function(){(w[c].q=w[c].q||[]).push(arguments)};var ts = (+new Date()/86400000|0)*86400;var s = d.createElement('script');s.type = 'text/javascript';s.async = true;s.src = 'http://tracker.convead.io/widgets/'+ts+'/widget-$api_key.js';var x = d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s, x);})(window,document,'convead');
                     </script>
                     <!-- /Convead Widget -->";
         $APPLICATION->AddHeadString($head, true);
@@ -299,6 +313,10 @@ class cConveadTracker {
 
     private static function endsWith($haystack, $needle) {
         return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
+    }
+    
+    private static function contains($haystack, $needle) {
+        return $needle === "" || strpos($haystack,$needle) !== false;
     }
 
 }
