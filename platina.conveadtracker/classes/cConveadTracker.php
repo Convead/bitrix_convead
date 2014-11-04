@@ -25,7 +25,8 @@ class cConveadTracker {
         if(isset($_COOKIE["convead_guest_uid"]))
             return $_COOKIE["convead_guest_uid"];
         else{
-            $uid = substr(md5($_SESSION["SESS_SESSION_ID"]), 1, 16);
+            $key = isset($_SESSION["UNIQUE_KEY"])?$_SESSION["UNIQUE_KEY"]:time();
+            $uid = substr(md5($key), 1, 16);
             @setcookie("convead_guest_uid", $uid, 0, "/");
             return $uid;
         }

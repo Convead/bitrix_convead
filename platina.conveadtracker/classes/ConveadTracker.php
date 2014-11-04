@@ -43,7 +43,10 @@ class ConveadTracker {
         $this->api_key = $api_key;
         $this->guest_uid = $guest_uid;
         $this->visitor_info = $visitor_info;
-        $this->visitor_uid = $visitor_uid;
+        if (!$visitor_uid)
+            $this->visitor_uid = "";
+        else
+            $this->visitor_uid = $visitor_uid;
         $this->referer = $referer;
         $this->url = $url;
     }
@@ -52,7 +55,7 @@ class ConveadTracker {
         $post = array();
         $post["app_key"] = $this->api_key;
         $post["guest_uid"] = $this->guest_uid;
-        $this->visitor_uid && $post["visitor_uid"] = $this->visitor_uid;
+        $post["visitor_uid"] = $this->visitor_uid;
         $this->referrer && $post["referrer"] = $this->referrer;
         $this->visitor_info && $post["visitor_info"] = $this->visitor_info;
         if ($this->url) {
@@ -76,9 +79,9 @@ class ConveadTracker {
         $post["properties"]["product_id"] = $product_id;
         $product_name && $post["properties"]["product_name"] = $product_name;
         $product_url && $post["properties"]["product_url"] = $product_url;
-
-        $post = json_encode($post);
-
+        error_reporting(E_ALL);
+        $post = $this->json_encode($post);
+        $this->putLog($post);
         if ($this->brovser->get($this->api_page, $post) === true)
             return true;
         else
@@ -103,8 +106,8 @@ class ConveadTracker {
         $product_url && $post["properties"]["product_url"] = $product_url;
         $price && $post["properties"]["price"] = $price;
 
-        $post = json_encode($post);
-
+        $post = $this->json_encode($post);
+        $this->putLog($post);
         if ($this->brovser->get($this->api_page, $post) === true)
             return true;
         else
@@ -123,8 +126,8 @@ class ConveadTracker {
         $post["properties"]["product_id"] = $product_id;
         $post["properties"]["qnt"] = $qnt;
 
-        $post = json_encode($post);
-
+        $post = $this->json_encode($post);
+        $this->putLog($post);
         if ($this->brovser->get($this->api_page, $post) === true)
             return true;
         else
@@ -156,8 +159,8 @@ class ConveadTracker {
         unset($post["url"]);
         unset($post["host"]);
         unset($post["path"]);
-        $post = json_encode($post);
-
+        $post = $this->json_encode($post);
+        $this->putLog($post);
 
         if ($this->brovser->get($this->api_page, $post) === true)
             return true;
@@ -174,8 +177,8 @@ class ConveadTracker {
 
         $post["properties"] = $properties;
 
-        $post = json_encode($post);
-
+        $post = $this->json_encode($post);
+        $this->putLog($post);
 
         if ($this->brovser->get($this->api_page, $post) === true)
             return true;
@@ -190,13 +193,51 @@ class ConveadTracker {
         $post["url"] = "http://" . $this->url . $url;
         $post["path"] = $url;
 
-        $post = json_encode($post);
+        $post = $this->json_encode($post);
 
+        $this->putLog($post);
 
         if ($this->brovser->get($this->api_page, $post) === true)
             return true;
         else
             return $this->brovser->error;
+    }
+
+    private function putLog($message) {
+        $message = "\n" . date("Y.m.d H:i:s") . $message;
+        $filename = dirname(__FILE__) . "/log.log";
+        file_put_contents($filename, $message, FILE_APPEND);
+    }
+
+    private function json_encode($text) {
+        if (LANG_CHARSET == "windows-1251") {
+            return json_encode($this->json_fix($text));
+        } else {
+            return json_encode($text);
+        }
+    }
+
+    private function json_fix($data) {
+        # Process arrays
+        if (is_array($data)) {
+            $new = array();
+            foreach ($data as $k => $v) {
+                $new[$this->json_fix($k)] = $this->json_fix($v);
+            }
+            $data = $new;
+        }
+        # Process objects
+        else if (is_object($data)) {
+            $datas = get_object_vars($data);
+            foreach ($datas as $m => $v) {
+                $data->$m = $this->json_fix($v);
+            }
+        }
+        # Process strings
+        else if (is_string($data)) {
+            $data = iconv('cp1251', 'utf-8', $data);
+        }
+        return $data;
     }
 
 }
