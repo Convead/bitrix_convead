@@ -43,10 +43,10 @@ class ConveadTracker {
         $this->api_key = $api_key;
         $this->guest_uid = $guest_uid;
         $this->visitor_info = $visitor_info;
-        if (!$visitor_uid)
-            $this->visitor_uid = "";
+        if(!$visitor_uid)
+          $this->visitor_uid = "";
         else
-            $this->visitor_uid = $visitor_uid;
+          $this->visitor_uid = $visitor_uid;
         $this->referer = $referer;
         $this->url = $url;
     }
@@ -74,14 +74,16 @@ class ConveadTracker {
      * @param type $product_url постоянный URL товара
      */
     public function eventProductView($product_id, $product_name = false, $product_url = false) {
+
         $post = $this->getDefaultPost();
         $post["type"] = "view_product";
         $post["properties"]["product_id"] = $product_id;
         $product_name && $post["properties"]["product_name"] = $product_name;
         $product_url && $post["properties"]["product_url"] = $product_url;
-        error_reporting(E_ALL);
+        //error_reporting(E_ALL);
         $post = $this->json_encode($post);
         $this->putLog($post);
+        //echo $post; die();
         if ($this->brovser->get($this->api_page, $post) === true)
             return true;
         else
@@ -203,38 +205,45 @@ class ConveadTracker {
             return $this->brovser->error;
     }
 
-    private function putLog($message) {
+    private function putLog($message){
+        return true;
         $message = "\n" . date("Y.m.d H:i:s") . $message;
         $filename = dirname(__FILE__) . "/log.log";
         file_put_contents($filename, $message, FILE_APPEND);
     }
 
-    private function json_encode($text) {
-        if (LANG_CHARSET == "windows-1251") {
-            return json_encode($this->json_fix($text));
-        } else {
-            return json_encode($text);
-        }
+    private function json_encode($text){
+      if(LANG_CHARSET == "windows-1251"){
+        return json_encode($this->json_fix($text));
+      }else{
+        return json_encode($text);
+      }
     }
 
-    private function json_fix($data) {
+    private function json_fix($data)
+    {
         # Process arrays
-        if (is_array($data)) {
+        if(is_array($data))
+        {
             $new = array();
-            foreach ($data as $k => $v) {
+            foreach ($data as $k => $v)
+            {
                 $new[$this->json_fix($k)] = $this->json_fix($v);
             }
             $data = $new;
         }
         # Process objects
-        else if (is_object($data)) {
+        else if(is_object($data))
+        {
             $datas = get_object_vars($data);
-            foreach ($datas as $m => $v) {
+            foreach ($datas as $m => $v)
+            {
                 $data->$m = $this->json_fix($v);
             }
         }
         # Process strings
-        else if (is_string($data)) {
+        else if(is_string($data))
+        {
             $data = iconv('cp1251', 'utf-8', $data);
         }
         return $data;

@@ -33,6 +33,12 @@ class cConveadTracker {
     }
 
     static function productView($arResult, $user_id = false) {
+
+        if (self::contains($_SERVER["HTTP_USER_AGENT"], "facebook.com")) {
+            return;
+        }
+
+
         $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
         if (!$api_key)
             return;
