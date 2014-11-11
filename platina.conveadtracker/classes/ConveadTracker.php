@@ -43,9 +43,9 @@ class ConveadTracker {
         $this->api_key = $api_key;
         $this->guest_uid = $guest_uid;
         $this->visitor_info = $visitor_info;
-        if(!$visitor_uid)
-          $this->visitor_uid = "";
-        else
+        //if(!$visitor_uid)
+        //  $this->visitor_uid = "";
+        //else
           $this->visitor_uid = $visitor_uid;
         $this->referer = $referer;
         $this->url = $url;
@@ -54,8 +54,8 @@ class ConveadTracker {
     private function getDefaultPost() {
         $post = array();
         $post["app_key"] = $this->api_key;
-        $post["guest_uid"] = $this->guest_uid;
-        $post["visitor_uid"] = $this->visitor_uid;
+        $this->guest_uid && $post["guest_uid"] = $this->guest_uid;
+        $this->visitor_uid && $post["visitor_uid"] = $this->visitor_uid;
         $this->referrer && $post["referrer"] = $this->referrer;
         $this->visitor_info && $post["visitor_info"] = $this->visitor_info;
         if ($this->url) {
