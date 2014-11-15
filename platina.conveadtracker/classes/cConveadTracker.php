@@ -69,7 +69,36 @@ class cConveadTracker {
         $product_name = $arResult["NAME"];
         $product_url = "http://" . SITE_SERVER_NAME . $APPLICATION->GetCurPage();
 
-        $result = $tracker->eventProductView($product_id, $product_name, $product_url);
+        $result = $tracker->eventProductView($product_id, $product_name, $product_url, $APPLICATION->GetCurPage());
+
+        return true;
+    }
+    
+    static function login($arResult) {
+
+        $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
+        if (!$api_key)
+            return;
+
+        global $APPLICATION;
+        
+        if(!$arResult["USER_ID"])
+            return;
+        
+        $visitor_uid = $arResult["USER_ID"];
+        
+        $visitor_info = false;
+        if ($visitor_uid && $visitor_info = self::getVisitorInfo($visitor_uid)) {
+            
+        }
+        $guest_uid = self::getUid(false);
+        $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
+
+        
+        $url = "http://" . SITE_SERVER_NAME . "/login";
+        $title = "Âõîä";
+        
+        $result = $tracker->view($url, $title);
 
         return true;
     }

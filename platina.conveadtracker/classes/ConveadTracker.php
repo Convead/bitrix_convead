@@ -46,7 +46,7 @@ class ConveadTracker {
         //if(!$visitor_uid)
         //  $this->visitor_uid = "";
         //else
-          $this->visitor_uid = $visitor_uid;
+        $this->visitor_uid = $visitor_uid;
         $this->referer = $referer;
         $this->url = $url;
     }
@@ -54,15 +54,24 @@ class ConveadTracker {
     private function getDefaultPost() {
         $post = array();
         $post["app_key"] = $this->api_key;
-        $this->guest_uid && $post["guest_uid"] = $this->guest_uid;
-        $this->visitor_uid && $post["visitor_uid"] = $this->visitor_uid;
+
+        if ($this->guest_uid)
+            $post["guest_uid"] = $this->guest_uid;
+        else
+            $post["guest_uid"] = "";
+
+        if ($this->visitor_uid)
+            $post["visitor_uid"] = $this->visitor_uid;
+        else
+            $post["visitor_uid"] = "";
+
         $this->referrer && $post["referrer"] = $this->referrer;
         $this->visitor_info && $post["visitor_info"] = $this->visitor_info;
         if ($this->url) {
             $post["url"] = "http://" . $this->url;
             $post["domain"] = $this->url;
             $post["host"] = $this->url;
-            $post["path"] = "http://" . $this->url;
+            //$post["path"] = $this->url;
         }
         return $post;
     }
@@ -73,10 +82,11 @@ class ConveadTracker {
      * @param type $product_name наименование товара
      * @param type $product_url постоянный URL товара
      */
-    public function eventProductView($product_id, $product_name = false, $product_url = false) {
+    public function eventProductView($product_id, $product_name = false, $product_url = false, $path) {
 
         $post = $this->getDefaultPost();
         $post["type"] = "view_product";
+        $post["path"] = $path;
         $post["properties"]["product_id"] = $product_id;
         $product_name && $post["properties"]["product_name"] = $product_name;
         $product_url && $post["properties"]["product_url"] = $product_url;
@@ -205,45 +215,39 @@ class ConveadTracker {
             return $this->brovser->error;
     }
 
-    private function putLog($message){
+    private function putLog($message) {
         return true;
         $message = "\n" . date("Y.m.d H:i:s") . $message;
         $filename = dirname(__FILE__) . "/log.log";
         file_put_contents($filename, $message, FILE_APPEND);
     }
 
-    private function json_encode($text){
-      if(LANG_CHARSET == "windows-1251"){
-        return json_encode($this->json_fix($text));
-      }else{
-        return json_encode($text);
-      }
+    private function json_encode($text) {
+        if (LANG_CHARSET == "windows-1251") {
+            return json_encode($this->json_fix($text));
+        } else {
+            return json_encode($text);
+        }
     }
 
-    private function json_fix($data)
-    {
+    private function json_fix($data) {
         # Process arrays
-        if(is_array($data))
-        {
+        if (is_array($data)) {
             $new = array();
-            foreach ($data as $k => $v)
-            {
+            foreach ($data as $k => $v) {
                 $new[$this->json_fix($k)] = $this->json_fix($v);
             }
             $data = $new;
         }
         # Process objects
-        else if(is_object($data))
-        {
+        else if (is_object($data)) {
             $datas = get_object_vars($data);
-            foreach ($datas as $m => $v)
-            {
+            foreach ($datas as $m => $v) {
                 $data->$m = $this->json_fix($v);
             }
         }
         # Process strings
-        else if(is_string($data))
-        {
+        else if (is_string($data)) {
             $data = iconv('cp1251', 'utf-8', $data);
         }
         return $data;
