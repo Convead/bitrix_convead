@@ -47,7 +47,7 @@ class platina_conveadtracker extends CModule {
         RegisterModuleDependences("main", "OnAfterEpilog", $this->MODULE_ID, "cConveadTracker", "view", "100");
         RegisterModuleDependences("main", "OnBeforeProlog", $this->MODULE_ID, "cConveadTracker", "head", "100");
         RegisterModuleDependences("sale", "OnBasketUpdate", $this->MODULE_ID, "cConveadTracker", "updateCart", "100");
-        RegisterModuleDependences("main", "OnAfterUserLogin", $this->MODULE_ID, "cConveadTracker", "login", "100");
+        RegisterModuleDependences("main", "OnAfterUserAuthorize", $this->MODULE_ID, "cConveadTracker", "login", "100");
         
         $this->InstallFiles();
         $this->InstallDB();
@@ -61,7 +61,7 @@ class platina_conveadtracker extends CModule {
         UnRegisterModuleDependences("main", "OnAfterEpilog", $this->MODULE_ID, "cConveadTracker", "view");
         UnRegisterModuleDependences("main", "OnBeforeProlog", $this->MODULE_ID, "cConveadTracker", "head");
         UnRegisterModuleDependences("sale", "OnBasketUpdate", $this->MODULE_ID, "cConveadTracker", "updateCart");
-        UnRegisterModuleDependences("main", "OnAfterUserLogin", $this->MODULE_ID, "cConveadTracker", "login");
+        UnRegisterModuleDependences("main", "OnAfterUserAuthorize", $this->MODULE_ID, "cConveadTracker", "login");
         $this->UnInstallFiles();
         UnRegisterModule($this->MODULE_ID);
     }

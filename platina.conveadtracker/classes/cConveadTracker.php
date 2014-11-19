@@ -75,17 +75,18 @@ class cConveadTracker {
     }
     
     static function login($arResult) {
-
+        
+        $arResult = $arResult["user_fields"];
         $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
         if (!$api_key)
             return;
 
         global $APPLICATION;
         
-        if(!$arResult["USER_ID"])
+        if(!$arResult["ID"])
             return;
         
-        $visitor_uid = $arResult["USER_ID"];
+        $visitor_uid = $arResult["ID"];
         
         $visitor_info = false;
         if ($visitor_uid && $visitor_info = self::getVisitorInfo($visitor_uid)) {
