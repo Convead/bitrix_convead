@@ -7,7 +7,7 @@ class cConveadTracker {
     static function getVisitorInfo($id) {
         if ($usr = CUser::GetByID($id)) {
             $user = $usr->Fetch();
-
+            
             $visitor_info = array();
             $user["NAME"] && $visitor_info["first_name"] = $user["NAME"];
             $user["LAST_NAME"] && $visitor_info["last_name"] = $user["LAST_NAME"];
@@ -131,6 +131,10 @@ class cConveadTracker {
     }
 
     static function updateCart($id, $arFields = false) {
+        
+        if(!class_exists("CCatalogSku"))
+            return false;
+        
         $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
         if (!$api_key)
             return;
@@ -145,7 +149,7 @@ class cConveadTracker {
 
 
         $basket = CSaleBasket::GetByID($id);
-
+        //print_r($basket);die();
         $user_id = $basket["FUSER_ID"];
         $items = array();
         $orders = CSaleBasket::GetList(
@@ -176,13 +180,13 @@ class cConveadTracker {
         
         $visitor_uid = false;
         $visitor_info = false;
-        if ($arFields && $user_id && $visitor_info = self::getVisitorInfo($user_id)) {
+        if ($visitor_info = self::getVisitorInfo($user_id) || $user_id !== FALSE) {
             $visitor_uid = $user_id;
         }
         $guest_uid = self::getUid($visitor_uid);
+        
         $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
-
-
+        
         $result = $tracker->eventUpdateCart($items);
 
         return true;
