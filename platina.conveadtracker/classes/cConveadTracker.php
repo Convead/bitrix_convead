@@ -176,7 +176,10 @@ class cConveadTracker {
         //if(count($items) == 0)
         //    return;
 
-
+        global $USER;
+        $user_id = false;
+        if($USER->GetID())
+            $user_id = $USER->GetID();
         
         $visitor_uid = false;
         $visitor_info = false;
