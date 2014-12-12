@@ -14,7 +14,7 @@ class cConveadTracker {
             $user["EMAIL"] && $visitor_info["email"] = $user["EMAIL"];
             $user["PERSONAL_PHONE"] && $visitor_info["phone"] = $user["PERSONAL_PHONE"];
             $user["PERSONAL_BIRTHDAY"] && $visitor_info["date_of_birth"] = date('Y-m-d', $user["PERSONAL_BIRTHDAY"]);
-            $user["PERSONAL_GENDER"] && $visitor_info["gender"] = ($user["PERSONAL_GENDER"] == "M" ? "male" : "femail");
+            $user["PERSONAL_GENDER"] && $visitor_info["gender"] = ($user["PERSONAL_GENDER"] == "M" ? "male" : "female");
             return $visitor_info;
         } else {
             return false;
@@ -97,7 +97,7 @@ class cConveadTracker {
 
         
         $url = "http://" . SITE_SERVER_NAME . "/login";
-        $title = "Вход";
+        $title = "Г‚ГµГ®Г¤";
         
         $result = $tracker->view($url, $title);
 
@@ -142,7 +142,7 @@ class cConveadTracker {
         if ($arFields && !isset($arFields["FUSER_ID"]) && !isset($arFields["DELAY"])) {//just viewving
             return;
         }
-        if ($arFields && isset($arFields["ORDER_ID"])) {//оформление заказа
+        if ($arFields && isset($arFields["ORDER_ID"])) {//Г®ГґГ®Г°Г¬Г«ГҐГ­ГЁГҐ Г§Г ГЄГ Г§Г 
             return;
         }
 
