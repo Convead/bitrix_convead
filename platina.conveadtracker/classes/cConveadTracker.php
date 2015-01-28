@@ -97,7 +97,7 @@ class cConveadTracker {
 
         
         $url = "http://" . SITE_SERVER_NAME . "/login";
-        $title = "Âõîä";
+        $title = "Вход";
         
         $result = $tracker->view($url, $title);
 
@@ -142,7 +142,7 @@ class cConveadTracker {
         if ($arFields && !isset($arFields["FUSER_ID"]) && !isset($arFields["DELAY"])) {//just viewving
             return;
         }
-        if ($arFields && isset($arFields["ORDER_ID"])) {//îôîðìëåíèå çàêàçà
+        if ($arFields && isset($arFields["ORDER_ID"])) {// purchasing
             return;
         }
 
@@ -166,7 +166,7 @@ class cConveadTracker {
                     continue;
             }
             $arProd = CCatalogSku::GetProductInfo($order["PRODUCT_ID"]);
-            $item["product_id"] = $arProd["ID"];
+            $item["product_id"] = isset($arProd["ID"])?$arProd["ID"]:$order["PRODUCT_ID"];
             $item["qnt"] = $order["QUANTITY"];
             $item["price"] = $order["PRICE"];
             $items[$i . ""] = $item;
@@ -183,7 +183,8 @@ class cConveadTracker {
         
         $visitor_uid = false;
         $visitor_info = false;
-        if ($visitor_info = self::getVisitorInfo($user_id) || $user_id !== FALSE) {
+        $visitor_info = self::getVisitorInfo($user_id);
+        if ($visitor_info || $user_id !== FALSE) {
             $visitor_uid = $user_id;
         }
         $guest_uid = self::getUid($visitor_uid);
@@ -248,7 +249,7 @@ class cConveadTracker {
         $i = 0;
         while ($order = $orders->Fetch()) {
             $arProd = CCatalogSku::GetProductInfo($order["PRODUCT_ID"]);
-            $item["product_id"] = $arProd["ID"];
+            $item["product_id"] = isset($arProd["ID"])?$arProd["ID"]:$order["PRODUCT_ID"];
             $item["qnt"] = $order["QUANTITY"];
             $item["price"] = $order["PRICE"];
             $items[$i . ""] = $item;
