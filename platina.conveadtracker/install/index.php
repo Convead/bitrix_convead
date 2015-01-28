@@ -48,6 +48,7 @@ class platina_conveadtracker extends CModule {
         RegisterModuleDependences("main", "OnBeforeProlog", $this->MODULE_ID, "cConveadTracker", "head", "100");
         RegisterModuleDependences("sale", "OnBasketUpdate", $this->MODULE_ID, "cConveadTracker", "updateCart", "100");
         RegisterModuleDependences("main", "OnAfterUserAuthorize", $this->MODULE_ID, "cConveadTracker", "login", "100");
+        RegisterModuleDependences("sale", "OnViewedAdd", $this->MODULE_ID, "cConveadTracker", "productView", "100");
         
         $this->InstallFiles();
         $this->InstallDB();
@@ -62,21 +63,13 @@ class platina_conveadtracker extends CModule {
         UnRegisterModuleDependences("main", "OnBeforeProlog", $this->MODULE_ID, "cConveadTracker", "head");
         UnRegisterModuleDependences("sale", "OnBasketUpdate", $this->MODULE_ID, "cConveadTracker", "updateCart");
         UnRegisterModuleDependences("main", "OnAfterUserAuthorize", $this->MODULE_ID, "cConveadTracker", "login");
+        UnRegisterModuleDependences("main", "OnViewedAdd", $this->MODULE_ID, "cConveadTracker", "productView");
         $this->UnInstallFiles();
         UnRegisterModule($this->MODULE_ID);
     }
 
     function InstallFiles() {
-        if (GetFileExtension(
-                        $_SERVER["DOCUMENT_ROOT"] . "/bitrix/components/bitrix/catalog/templates/.default/bitrix/catalog.element/.default/component_epilog.php"
-                )) {
-            CopyDirFiles(
-                    $_SERVER["DOCUMENT_ROOT"] . "/bitrix/components/bitrix/catalog/templates/.default/bitrix/catalog.element/.default/component_epilog.php", $_SERVER["DOCUMENT_ROOT"] . "/bitrix/components/bitrix/catalog/templates/.default/bitrix/catalog.element/.default/component_epilog_back.php", true
-            );
-        }
-        CopyDirFiles(
-                $_SERVER["DOCUMENT_ROOT"] . "/bitrix/modules/platina.conveadtracker/install/components/bitrix/catalog/templates/.default/bitrix/catalog.element/.default/component_epilog.php", $_SERVER["DOCUMENT_ROOT"] . "/bitrix/components/bitrix/catalog/templates/.default/bitrix/catalog.element/.default/component_epilog.php", true
-        );
+        
         return true;
     }
 
@@ -86,17 +79,7 @@ class platina_conveadtracker extends CModule {
     }
 
     function UnInstallFiles() {
-        DeleteDirFilesEx(
-                $_SERVER["DOCUMENT_ROOT"] . "/bitrix/components/bitrix/catalog/templates/.default/bitrix/catalog.element/.default/component_epilog.php"
-        );
         
-        if (GetFileExtension(
-                        $_SERVER["DOCUMENT_ROOT"] . "/bitrix/components/bitrix/catalog/templates/.default/bitrix/catalog.element/.default/component_epilog_back.php"
-                )) {
-            CopyDirFiles(
-                    $_SERVER["DOCUMENT_ROOT"] . "/bitrix/components/bitrix/catalog/templates/.default/bitrix/catalog.element/.default/component_epilog_back.php", $_SERVER["DOCUMENT_ROOT"] . "/bitrix/components/bitrix/catalog/templates/.default/bitrix/catalog.element/.default/component_epilog.php", true
-            );
-        }
         return true;
     }
 

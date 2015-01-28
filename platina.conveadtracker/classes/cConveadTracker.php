@@ -55,9 +55,12 @@ class cConveadTracker {
             return;
 
         global $APPLICATION;
+        global $USER;
         
         $visitor_uid = false;
-        
+        if(!$user_id)
+            $user_id = $USER->GetID();
+
         $visitor_info = false;
         if ($user_id && $visitor_info = self::getVisitorInfo($user_id)) {
             $visitor_uid = (int) $user_id;
@@ -65,10 +68,12 @@ class cConveadTracker {
         $guest_uid = self::getUid($visitor_uid);
         $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
 
-        $product_id = $arResult["ID"];
-        $product_name = $arResult["NAME"];
-        $product_url = "http://" . SITE_SERVER_NAME . $APPLICATION->GetCurPage();
-
+        $arProduct = CCatalogProduct::GetByIDEx($arResult["PRODUCT_ID"]);
+        
+        $product_id = $arResult["PRODUCT_ID"];
+        $product_name = $arProduct["NAME"];
+        $product_url = "http://" . SITE_SERVER_NAME . $arProduct["DETAIL_PAGE_URL"];
+        
         $result = $tracker->eventProductView($product_id, $product_name, $product_url, $APPLICATION->GetCurPage());
 
         return true;
