@@ -59,7 +59,7 @@ class Browser {
     public function isUAAbandoned($user_agent){
         if(!$user_agent)
             return true;
-        $re = "/bot|crawl(er|ing)|google|yandex|rambler|yahoo|bingpreview|alexa|facebookexternalhit|bitrix/"; 
+        $re = "/bot|crawl(er|ing)|google|yandex|rambler|yahoo|bingpreview|alexa|facebookexternalhit|bitrix/i"; 
         
         $matches = array(); 
         preg_match($re, $user_agent, $matches);
