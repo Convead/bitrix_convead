@@ -318,6 +318,7 @@ class cConveadTracker {
     }
 
     static function order($arFields) {
+        
         $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
         if (!$api_key)
             return;
@@ -328,6 +329,11 @@ class cConveadTracker {
             $visitor_uid = $arFields["USER_ID"];
         }
         $guest_uid = self::getUid($visitor_uid);
+
+        $phone_name = COption::GetOptionString(self::$MODULE_ID, "phone_code", '');
+        if($phone_name && isset($_POST[$phone_name])){
+            $visitor_info["phone"] = $_POST[$phone_name];
+        }
 
        
         $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);

@@ -40,6 +40,23 @@ if ((!empty($save) || !empty($restore)) && $REQUEST_METHOD == "POST" && check_bi
 	} else {
 		CAdminMessage::ShowMessage(Loc::getMessage("ERROR_TRACKER_CODE_EMPTY"));
 	}
+
+	if (
+		!empty($_REQUEST["phone_code"])
+		&& $_REQUEST["phone_code"] != ""
+	) {
+		
+		
+		COption::SetOptionString(
+			ADMIN_MODULE_NAME,
+			"phone_code",
+			$_REQUEST["phone_code"],
+			Loc::getMessage("PHONE_CODE")
+		);
+		CAdminMessage::ShowMessage(array("MESSAGE" => Loc::getMessage("OPTIONS_SAVED"), "TYPE" => "OK"));
+		
+	}
+
 }
 
 $tabControl->Begin();
@@ -56,6 +73,17 @@ $tabControl->Begin();
 			<input type="text" size="50"  name="tracker_code"
 				   value="<?= htmlspecialcharsbx(
 					   COption::GetOptionString(ADMIN_MODULE_NAME, "tracker_code", '')
+				   ) ?>">
+		</td>
+	</tr>
+
+	<tr>
+		<td width="40%">
+			<label for="phone_code"><?= Loc::getMessage("PHONE_CODE") ?>:</label>
+		<td width="60%">
+			<input type="text" size="50"  name="phone_code"
+				   value="<?= htmlspecialcharsbx(
+					   COption::GetOptionString(ADMIN_MODULE_NAME, "phone_code", '')
 				   ) ?>">
 		</td>
 	</tr>
