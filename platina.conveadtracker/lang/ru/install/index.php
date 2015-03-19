@@ -1,5 +1,5 @@
 <?php
-$MESS['convead_tracker.MODULE_NAME'] = "Òðåêåð äëÿ Convead";
-$MESS['convead_tracker.MODULE_DESCRIPTION'] = "Òðåêåð äëÿ Convead";
+$MESS['convead_tracker.MODULE_NAME'] = "Ð¢Ñ€ÐµÐºÐµÑ€ Ð´Ð»Ñ Convead";
+$MESS['convead_tracker.MODULE_DESCRIPTION'] = "Ð¢Ñ€ÐµÐºÐµÑ€ Ð´Ð»Ñ Convead";
 
 ?>

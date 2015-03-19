@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Класс для работы с сервисом convead.io
+ * пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ convead.io
  */
 class ConveadTracker {
 
@@ -19,7 +19,7 @@ class ConveadTracker {
      * @param type $api_key
      * @param type $guest_uid
      * @param type $visitor_uid
-     * @param type $visitor_info структура с параметрами текущего визитора (все параметры опциональные) следующего вида:
+     * @param type $visitor_info пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ) пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ:
       {
       first_name: 'Name',
       last_name: 'Surname',
@@ -78,9 +78,9 @@ class ConveadTracker {
 
     /**
      * 
-     * @param type $product_id ID товара в магазине (такой же, как в XML-фиде Яндекс.Маркет/Google Merchant)
-     * @param type $product_name наименование товара
-     * @param type $product_url постоянный URL товара
+     * @param type $product_id ID пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ, пїЅпїЅпїЅ пїЅ XML-пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.пїЅпїЅпїЅпїЅпїЅпїЅ/Google Merchant)
+     * @param type $product_name пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+     * @param type $product_url пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ URL пїЅпїЅпїЅпїЅпїЅпїЅ
      */
     public function eventProductView($product_id, $product_name = false, $product_url = false, $path) {
 
@@ -102,11 +102,11 @@ class ConveadTracker {
 
     /**
      * 
-     * @param type $product_id - ID товара в магазине (такой же, как в XML-фиде Яндекс.Маркет/Google Merchant)
-     * @param type $qnt количество ед. добавляемого товара
-     * @param type $product_name наименование товара
-     * @param type $product_url постоянный URL товара
-     * @param type $price стоимость 1 ед. добавляемого товара
+     * @param type $product_id - ID пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ, пїЅпїЅпїЅ пїЅ XML-пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.пїЅпїЅпїЅпїЅпїЅпїЅ/Google Merchant)
+     * @param type $qnt пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+     * @param type $product_name пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+     * @param type $product_url пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ URL пїЅпїЅпїЅпїЅпїЅпїЅ
+     * @param type $price пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 1 пїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
      * @return boolean
      */
     public function eventAddToCart($product_id, $qnt, $product_name = false, $product_url = false, $price = false) {
@@ -128,8 +128,8 @@ class ConveadTracker {
 
     /**
      * 
-     * @param type $product_id ID товара в магазине (такой же, как в XML-фиде Яндекс.Маркет/Google Merchant)
-     * @param type $qnt количество ед. добавляемого товара
+     * @param type $product_id ID пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ, пїЅпїЅпїЅ пїЅ XML-пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.пїЅпїЅпїЅпїЅпїЅпїЅ/Google Merchant)
+     * @param type $qnt пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
      * @return boolean
      */
     public function eventRemoveFromCart($product_id, $qnt) {
@@ -148,9 +148,9 @@ class ConveadTracker {
 
     /**
      * 
-     * @param type $order_id - ID заказа в интернет-магазине
-     * @param type $revenue - общая сумма заказа
-     * @param type $order_array JSON-структура вида:
+     * @param type $order_id - ID пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+     * @param type $revenue - пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+     * @param type $order_array JSON-пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ:
       [
       {id: <product_id>, qnt: <product_count>, price: <product_price>},
       {...}
