@@ -43,116 +43,60 @@ class cConveadTracker {
         @setcookie("convead_guest_uid", "", time() - 3600, "/");
     }
 
-    static function productView($arResult, $user_id = false) {
+    static function productView($arResult, $user_id = false)
+      {
 
-      if($arResult["ID"]!="")
-        $arResult["PRODUCT_ID"]=$arResult["ID"];
+        if ($arResult["ID"] != "")
+          $arResult["PRODUCT_ID"] = $arResult["ID"];
 
-      if(class_exists("DataManager"))
-            return false;
+        if (class_exists("DataManager"))
+          return false;
 
-        if (self::contains($_SERVER["HTTP_USER_AGENT"], "facebook.com")) {
+        if (self::contains($_SERVER["HTTP_USER_AGENT"], "facebook.com"))
+          {
             return;
-        }
+          }
 
 
         $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
         if (!$api_key)
-            return;
+          return;
 
         global $APPLICATION;
         global $USER;
-        
+
         $visitor_uid = false;
-        if(!$user_id)
-            $user_id = $USER->GetID();
+        if (!$user_id)
+          $user_id = $USER->GetID();
 
         $visitor_info = false;
-        if ($user_id && $visitor_info = self::getVisitorInfo($user_id)) {
-            $visitor_uid = (int) $user_id;
-        }
+        if ($user_id && $visitor_info = self::getVisitorInfo($user_id))
+          {
+            $visitor_uid = (int)$user_id;
+          }
         $guest_uid = self::getUid($visitor_uid);
         $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
 
         $arProduct = CCatalogProduct::GetByIDEx($arResult["PRODUCT_ID"]);
         if(CCatalogSku::IsExistOffers($arResult["PRODUCT_ID"])){
-            $mxResult = CCatalogSKU::GetInfoByProductIBlock(
-             $arResult["IBLOCK_ID"]
-            );
-            
-            $sort = array();
-            $select = array("ID");
-            $properties = CIBlockProperty::GetList(Array("sort"=>"DESC", "name"=>"asc"), 
-                Array("ACTIVE"=>"Y", "IBLOCK_ID"=>$mxResult['IBLOCK_ID']/*, "PROPERTY_TYPE"=>"L", "MULTIPLE"=>"N"*/)
-                );
-            $pow = 0;
-            $props = array();
-           
-            while ($prop_fields = $properties->GetNext())
+          $arOffers = CIBlockPriceTools::GetOffersArray(
+             array("IBLOCK_ID"=>$arProduct["IBLOCK_ID"]),
+             array($arResult["PRODUCT_ID"]),
+             array(
+
+             ),
+             array("ID","ACTIVE")
+
+          );
+          foreach($arOffers as $array)
             {
-                //print_r($prop_fields);
-                if($prop_fields["PROPERTY_TYPE"] == "L" || $prop_fields["PROPERTY_TYPE"] != "L" && $prop_fields["USER_TYPE_SETTINGS"]){
-                    $select[] = "PROPERTY_".(isset($prop_fields["CODE"])?$prop_fields["CODE"]:$prop_fields["ID"]);
-                    
-                    $ar["MULTIPLIER"] = pow(10, $pow);
-                    if($prop_fields["PROPERTY_TYPE"] == "L")
-                        $ar["NAME"] = "PROPERTY_".(isset($prop_fields["CODE"])?$prop_fields["CODE"]:$prop_fields["ID"])."_ENUM_ID";
-                    else
-                        $ar["NAME"] = (isset($prop_fields["CODE"])?$prop_fields["CODE"]:$prop_fields["ID"]);
-                    $ar["PROPERTY_TYPE"] = $prop_fields["PROPERTY_TYPE"];
-                    $props[] = $ar;
-
-                    $pow++;
-                }
-            }
-            
-            $arFilter = array('IBLOCK_ID' => $mxResult['IBLOCK_ID'],'=PROPERTY_'.$mxResult['SKU_PROPERTY_ID'] => $arResult["PRODUCT_ID"]);
-            $rsOffersItems = CIBlockElement::GetList(
-                $sort,
-                $arFilter,
-                false,
-                false,
-                $select
-            );
-            
-            $res = array();
-            $num = 0;
-            while($t = $rsOffersItems->Fetch()){
-                
-                foreach($props as $prop){
-                    if($prop["PROPERTY_TYPE"] == "L")
-                        $p = CIBlockPropertyEnum::GetByID($t[$prop["NAME"]]);
-                    else{
-                        
-                        $filter = array("CODE"=>"COLOR_REF");
-                        $p = CIBlockElement::GetProperty(
-                                              $mxResult['IBLOCK_ID'],
-                                              $t["ID"],
-                                              array(),
-                                              array("CODE"=>$prop["NAME"])
-                                            )->Fetch();
-                        
-                    }
-                    
-                    
-                    $res[$t["ID"]] += isset($p["SORT"])?$p["SORT"]*$prop["MULTIPLIER"]:0;
-                }
-                $res[$t["ID"]] += $num;
-                $num++;
-            }
-
-            
-            asort($res);
-            
-            foreach($res as $k=>$v){
-                $arResult["PRODUCT_ID"] = $k;
+              if($array["ACTIVE"]=="Y"){
+                $arResult["PRODUCT_ID"]=$array["ID"];
                 break;
+              }
             }
-            
-            
-            
         }
-        
+
         $_SESSION["CONVEAD_PRODUCT_ID"] = $arResult["PRODUCT_ID"];
         $_SESSION["CONVEAD_PRODUCT_NAME"] = $arProduct["NAME"];
         $_SESSION["CONVEAD_PRODUCT_URL"] = "http://" . SITE_SERVER_NAME . $arProduct["DETAIL_PAGE_URL"];
@@ -161,12 +105,17 @@ class cConveadTracker {
         $product_name = $arProduct["NAME"];
         $product_url = "http://" . SITE_SERVER_NAME . $arProduct["DETAIL_PAGE_URL"];
 
-        return true;
+        if ($_SESSION["LAST_VIEW_ID"] == $arResult["PRODUCT_ID"])
+          return false;
+        else
+          {
+            $_SESSION["LAST_VIEW_ID"] = $arResult["PRODUCT_ID"];
+            return true;
+          }
+        //$result = $tracker->eventProductView($product_id, $product_name, $product_url, $APPLICATION->GetCurPage());
 
-        $result = $tracker->eventProductView($product_id, $product_name, $product_url, $APPLICATION->GetCurPage());
-
         return true;
-    }
+      }
     
     static function login($arResult) {
 
@@ -358,8 +307,7 @@ class cConveadTracker {
                 $i = 0;
                 while ($order = $orders->Fetch())
                   {
-                    $arProd = CCatalogSku::GetProductInfo($order["PRODUCT_ID"]);
-                    $item["product_id"] = isset($arProd["ID"]) ? $arProd["ID"] : $order["PRODUCT_ID"];
+                    $item["product_id"] =  $order["PRODUCT_ID"];
                     $item["qnt"] = $order["QUANTITY"];
                     $item["price"] = $order["PRICE"];
                     $items[$i . ""] = $item;
@@ -516,6 +464,11 @@ class cConveadTracker {
             global $APPLICATION;
             $APPLICATION->AddHeadString(self::HeadScript($api_key), false, true);
           }
+
+        @session_start();
+        $_SESSION["VIEWED_PRODUCT"]=0;
+        unset($_SESSION["VIEWED_ENABLE"]);
+
         return true;
       }
 
