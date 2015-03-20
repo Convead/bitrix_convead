@@ -78,43 +78,46 @@ class cConveadTracker {
         $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
 
         $arProduct = CCatalogProduct::GetByIDEx($arResult["PRODUCT_ID"]);
-        if(CCatalogSku::IsExistOffers($arResult["PRODUCT_ID"])){
-          $arOffers = CIBlockPriceTools::GetOffersArray(
-             array("IBLOCK_ID"=>$arProduct["IBLOCK_ID"]),
-             array($arResult["PRODUCT_ID"]),
-             array(
-
-             ),
-             array("ID","ACTIVE")
-
-          );
-          foreach($arOffers as $array)
-            {
-              if($array["ACTIVE"]=="Y"){
-                $arResult["PRODUCT_ID"]=$array["ID"];
-                break;
-              }
-            }
-        }
-
-        $_SESSION["CONVEAD_PRODUCT_ID"] = $arResult["PRODUCT_ID"];
-        $_SESSION["CONVEAD_PRODUCT_NAME"] = $arProduct["NAME"];
-        $_SESSION["CONVEAD_PRODUCT_URL"] = "http://" . SITE_SERVER_NAME . $arProduct["DETAIL_PAGE_URL"];
-
-        $product_id = $arResult["PRODUCT_ID"];
-        $product_name = $arProduct["NAME"];
-        $product_url = "http://" . SITE_SERVER_NAME . $arProduct["DETAIL_PAGE_URL"];
-
-        if ($_SESSION["LAST_VIEW_ID"] == $arResult["PRODUCT_ID"])
-          return false;
-        else
+        if ($arProduct && strpos($APPLICATION->GetCurPage(), $arProduct["DETAIL_PAGE_URL"]) !== false)
           {
-            $_SESSION["LAST_VIEW_ID"] = $arResult["PRODUCT_ID"];
+            if (CCatalogSku::IsExistOffers($arResult["PRODUCT_ID"]))
+              {
+                $arOffers =
+                   CIBlockPriceTools::GetOffersArray(array("IBLOCK_ID" => $arProduct["IBLOCK_ID"]), array($arResult["PRODUCT_ID"]), array(), array(
+                         "ID",
+                         "ACTIVE"
+                      )
+
+                   );
+                foreach ($arOffers as $array)
+                  {
+                    if ($array["ACTIVE"] == "Y")
+                      {
+                        $arResult["PRODUCT_ID"] = $array["ID"];
+                        break;
+                      }
+                  }
+              }
+
+            $_SESSION["CONVEAD_PRODUCT_ID"] = $arResult["PRODUCT_ID"];
+            $_SESSION["CONVEAD_PRODUCT_NAME"] = $arProduct["NAME"];
+            $_SESSION["CONVEAD_PRODUCT_URL"] = "http://" . SITE_SERVER_NAME . $arProduct["DETAIL_PAGE_URL"];
+
+            $product_id = $arResult["PRODUCT_ID"];
+            $product_name = $arProduct["NAME"];
+            $product_url = "http://" . SITE_SERVER_NAME . $arProduct["DETAIL_PAGE_URL"];
+
+            if ($_SESSION["LAST_VIEW_ID"] == $arResult["PRODUCT_ID"])
+              return false;
+            else
+              {
+                $_SESSION["LAST_VIEW_ID"] = $arResult["PRODUCT_ID"];
+                return true;
+              }
+            //$result = $tracker->eventProductView($product_id, $product_name, $product_url, $APPLICATION->GetCurPage());
+
             return true;
           }
-        //$result = $tracker->eventProductView($product_id, $product_name, $product_url, $APPLICATION->GetCurPage());
-
-        return true;
       }
     
     static function login($arResult) {
