@@ -449,6 +449,25 @@ class cConveadTracker {
         $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
         if (!$api_key)
           return;
+        global $APPLICATION,$USER;
+        $url = $APPLICATION->GetCurUri();
+        if (self::endsWith($url, "ajax.php?UPDATE_STATE")) {
+          return;
+        } elseif (self::startsWith($url, "/bitrix/admin/")) {
+          return;
+        } elseif (self::contains($url, "/bitrix/tools/captcha.php")) {
+          return;
+        } elseif (self::contains($url, "bitrix/tools/autosave.php?bxsender=core_autosave")) {
+          return;
+        }
+
+        $visitor_info = false;
+        $visitor_uid = false;
+        if ($USER && $USER->GetID() && $USER->GetID() > 0 && $visitor_info = self::getVisitorInfo($USER->GetID())) {
+          $visitor_uid = $USER->GetID();
+        }
+        $guest_uid = self::getUid($visitor_uid);
+
 
         if (CHTMLPagesCache::IsOn())
           {
