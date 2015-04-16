@@ -5,42 +5,52 @@ class cConveadTracker {
     static $MODULE_ID = "platina.conveadtracker";
 
     static function getVisitorInfo($id) {
-        if ($usr = CUser::GetByID($id)) {
-            $user = $usr->Fetch();
-            
-            $visitor_info = array();
-            $user["NAME"] && $visitor_info["first_name"] = $user["NAME"];
-            $user["LAST_NAME"] && $visitor_info["last_name"] = $user["LAST_NAME"];
-            $user["EMAIL"] && $visitor_info["email"] = $user["EMAIL"];
-            $user["PERSONAL_PHONE"] && $visitor_info["phone"] = $user["PERSONAL_PHONE"];
-            $user["PERSONAL_BIRTHDAY"] && $visitor_info["date_of_birth"] = date('Y-m-d', $user["PERSONAL_BIRTHDAY"]);
-            $user["PERSONAL_GENDER"] && $visitor_info["gender"] = ($user["PERSONAL_GENDER"] == "M" ? "male" : "female");
-            return $visitor_info;
-        } else {
-            return false;
-        }
+      if ($usr = CUser::GetByID($id)) {
+        $user = $usr->Fetch();
+
+        $visitor_info = array();
+        $user["NAME"] && $visitor_info["first_name"] = $user["NAME"];
+        $user["LAST_NAME"] && $visitor_info["last_name"] = $user["LAST_NAME"];
+        $user["EMAIL"] && $visitor_info["email"] = $user["EMAIL"];
+        $user["PERSONAL_PHONE"] && $visitor_info["phone"] = $user["PERSONAL_PHONE"];
+        $user["PERSONAL_BIRTHDAY"] && $visitor_info["date_of_birth"] = date('Y-m-d', $user["PERSONAL_BIRTHDAY"]);
+        $user["PERSONAL_GENDER"] && $visitor_info["gender"] = ($user["PERSONAL_GENDER"] == "M" ? "male" : "female");
+
+        if(file_exists($_SERVER["DOCUMENT_ROOT"]."/bitrix/php_interface/include/helper/ConveadHelper.php"))
+          {
+            include_once $_SERVER["DOCUMENT_ROOT"]."/bitrix/php_interface/include/helper/ConveadHelper.php";
+            if(method_exists('ConveadHelper', 'GetAddInfo'))
+              {
+                $visitor_info = ConveadHelper::GetAddInfo($id,$visitor_info,$user);
+              }
+          }
+
+        return $visitor_info;
+      } else {
+        return false;
+      }
     }
 
     static function getUid($visitor_uid) {
-        if($visitor_uid){
-            self::resetUid ();
-            
-            return false;
-        }
-        
-        if (isset($_COOKIE["convead_guest_uid"]))
-            return $_COOKIE["convead_guest_uid"];
-        else {
-            $key = isset($_SESSION["UNIQUE_KEY"]) ? $_SESSION["UNIQUE_KEY"] . time() : time();
-            $uid = substr(md5($key), 1, 16);
-            @setcookie("convead_guest_uid", $uid, 0, "/");
-            return $uid;
-        }
+      if($visitor_uid){
+        self::resetUid ();
+
+        return false;
+      }
+
+      if (isset($_COOKIE["convead_guest_uid"]))
+        return $_COOKIE["convead_guest_uid"];
+      else {
+        $key = isset($_SESSION["UNIQUE_KEY"]) ? $_SESSION["UNIQUE_KEY"] . time() : time();
+        $uid = substr(md5($key), 1, 16);
+        @setcookie("convead_guest_uid", $uid, 0, "/");
+        return $uid;
+      }
     }
 
     static function resetUid() {
-        unset($_COOKIE['convead_guest_uid']);
-        @setcookie("convead_guest_uid", "", time() - 3600, "/");
+      unset($_COOKIE['convead_guest_uid']);
+      @setcookie("convead_guest_uid", "", time() - 3600, "/");
     }
 
     static function productView($arResult, $user_id = false)
@@ -119,157 +129,157 @@ class cConveadTracker {
             return true;
           }
       }
-    
+
     static function login($arResult) {
 
-        $arResult = $arResult["user_fields"];
-        $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
-        if (!$api_key)
-            return;
+      $arResult = $arResult["user_fields"];
+      $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
+      if (!$api_key)
+        return;
 
-        global $APPLICATION;
-        
-        if(!$arResult["ID"])
-            return;
-        
-        $visitor_uid = $arResult["ID"];
-        
-        $visitor_info = false;
-        if ($visitor_uid && $visitor_info = self::getVisitorInfo($visitor_uid)) {
-            
-        }
-        $guest_uid = self::getUid(false);
-        $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
+      global $APPLICATION;
 
-        
-        $url = "http://" . SITE_SERVER_NAME . "/login";
-        $title = "Вход";
-        
-        $result = $tracker->view($url, $title);
+      if(!$arResult["ID"])
+        return;
 
-        return true;
+      $visitor_uid = $arResult["ID"];
+
+      $visitor_info = false;
+      if ($visitor_uid && $visitor_info = self::getVisitorInfo($visitor_uid)) {
+
+      }
+      $guest_uid = self::getUid(false);
+      $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
+
+
+      $url = "http://" . SITE_SERVER_NAME . "/login";
+      $title = "Вход";
+
+      $result = $tracker->view($url, $title);
+
+      return true;
     }
 
     static function addToCart($arFields) {
-        return true;
-        $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
-        if (!$api_key)
-            return;
-        
-        $visitor_uid = false;
-        $visitor_info = false;
-        if ($arFields["FUSER_ID"] && $arFields["FUSER_ID"] && $visitor_info = self::getVisitorInfo($arFields["FUSER_ID"])) {
-            $visitor_uid = $arFields["FUSER_ID"];
-        }
-        $guest_uid = self::getUid($visitor_uid);
+      return true;
+      $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
+      if (!$api_key)
+        return;
 
-        $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
+      $visitor_uid = false;
+      $visitor_info = false;
+      if ($arFields["FUSER_ID"] && $arFields["FUSER_ID"] && $visitor_info = self::getVisitorInfo($arFields["FUSER_ID"])) {
+        $visitor_uid = $arFields["FUSER_ID"];
+      }
+      $guest_uid = self::getUid($visitor_uid);
 
-        $product_id = $arFields["PRODUCT_ID"];
-        $qnt = $arFields["QUANTITY"];
-        $product_name = $arFields["NAME"];
-        $product_url = "http://" . SITE_SERVER_NAME . $arFields["DETAIL_PAGE_URL"];
-        $price = $arFields["PRICE"];
+      $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
 
-        $result = $tracker->eventAddToCart($product_id, $qnt, $product_name, $product_url, $price);
+      $product_id = $arFields["PRODUCT_ID"];
+      $qnt = $arFields["QUANTITY"];
+      $product_name = $arFields["NAME"];
+      $product_url = "http://" . SITE_SERVER_NAME . $arFields["DETAIL_PAGE_URL"];
+      $price = $arFields["PRICE"];
 
-        return true;
+      $result = $tracker->eventAddToCart($product_id, $qnt, $product_name, $product_url, $price);
+
+      return true;
     }
 
     static function updateCart($id, $arFields = false) {
 
-        if(!class_exists("CCatalogSku"))
-            return false;
-        
-        $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
-        if (!$api_key)
-            return;
-        
-        if ($arFields && !isset($arFields["PRODUCT_ID"]) && !isset($arFields["DELAY"])) {//just viewving
-            return;
-        }
-        
-        if ($arFields && isset($arFields["ORDER_ID"])) {// purchasing
-            return;
-        }
+      if(!class_exists("CCatalogSku"))
+        return false;
+
+      $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
+      if (!$api_key)
+        return;
+
+      if ($arFields && !isset($arFields["PRODUCT_ID"]) && !isset($arFields["DELAY"])) {//just viewving
+        return;
+      }
+
+      if ($arFields && isset($arFields["ORDER_ID"])) {// purchasing
+        return;
+      }
 
 
 
-        $basket = CSaleBasket::GetByID($id);
-        
-        $user_id = $basket["FUSER_ID"];
-        $items = array();
-        $orders = CSaleBasket::GetList(
-                        array(), array(
-                    "FUSER_ID" => $basket["FUSER_ID"],
-                    //"LID" => SITE_ID,
-                    "ORDER_ID" => "NULL"
-                        ), false, false, array()
-        );
-        $i = 0;
-        while ($order = $orders->Fetch()) {
-            if (!$arFields) {//deleting
-                if ($order["ID"] == $id)
-                    continue;
-            }
+      $basket = CSaleBasket::GetByID($id);
 
-            $item["product_id"] = $order["PRODUCT_ID"];
-            
-            $item["qnt"] = $order["QUANTITY"];
-            $item["price"] = $order["PRICE"];
-            $items[$i . ""] = $item;
-            $i++;
+      $user_id = $basket["FUSER_ID"];
+      $items = array();
+      $orders = CSaleBasket::GetList(
+         array(), array(
+         "FUSER_ID" => $basket["FUSER_ID"],
+         //"LID" => SITE_ID,
+         "ORDER_ID" => "NULL"
+      ), false, false, array()
+      );
+      $i = 0;
+      while ($order = $orders->Fetch()) {
+        if (!$arFields) {//deleting
+          if ($order["ID"] == $id)
+            continue;
         }
 
-        //if(count($items) == 0)
-        //    return;
+        $item["product_id"] = $order["PRODUCT_ID"];
 
-        global $USER;
-        $user_id = false;
-        if($USER->GetID())
-            $user_id = $USER->GetID();
-        
-        $visitor_uid = false;
-        $visitor_info = false;
-        $visitor_info = self::getVisitorInfo($user_id);
-        if ($visitor_info || $user_id !== FALSE) {
-            $visitor_uid = $user_id;
-        }
-        $guest_uid = self::getUid($visitor_uid);
-        
-        $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
-        
-        $result = $tracker->eventUpdateCart($items);
+        $item["qnt"] = $order["QUANTITY"];
+        $item["price"] = $order["PRICE"];
+        $items[$i . ""] = $item;
+        $i++;
+      }
 
-        return true;
+      //if(count($items) == 0)
+      //    return;
+
+      global $USER;
+      $user_id = false;
+      if($USER->GetID())
+        $user_id = $USER->GetID();
+
+      $visitor_uid = false;
+      $visitor_info = false;
+      $visitor_info = self::getVisitorInfo($user_id);
+      if ($visitor_info || $user_id !== FALSE) {
+        $visitor_uid = $user_id;
+      }
+      $guest_uid = self::getUid($visitor_uid);
+
+      $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
+
+      $result = $tracker->eventUpdateCart($items);
+
+      return true;
     }
 
     static function removeFromCart($id) {
-        return true;
-        $arFields = CSaleBasket::GetByID($id);
+      return true;
+      $arFields = CSaleBasket::GetByID($id);
 
-        $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
-        if (!$api_key)
-            return;
-        
-        $visitor_uid = false;
-        $visitor_info = false;
-        if ($arFields["FUSER_ID"] && $arFields["FUSER_ID"] && $visitor_info = self::getVisitorInfo($arFields["FUSER_ID"])) {
-            $visitor_uid = $arFields["FUSER_ID"];
-        }
-        $guest_uid = self::getUid($visitor_uid);
-        $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
+      $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
+      if (!$api_key)
+        return;
 
-        $product_id = $arFields["PRODUCT_ID"];
-        $qnt = $arFields["QUANTITY"];
-        $product_name = $arFields["NAME"];
-        $product_url = "http://" . SITE_SERVER_NAME . $arFields["DETAIL_PAGE_URL"];
-        $price = $arFields["PRICE"];
+      $visitor_uid = false;
+      $visitor_info = false;
+      if ($arFields["FUSER_ID"] && $arFields["FUSER_ID"] && $visitor_info = self::getVisitorInfo($arFields["FUSER_ID"])) {
+        $visitor_uid = $arFields["FUSER_ID"];
+      }
+      $guest_uid = self::getUid($visitor_uid);
+      $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
 
-        $result = $tracker->eventRemoveFromCart($product_id, $qnt);
+      $product_id = $arFields["PRODUCT_ID"];
+      $qnt = $arFields["QUANTITY"];
+      $product_name = $arFields["NAME"];
+      $product_url = "http://" . SITE_SERVER_NAME . $arFields["DETAIL_PAGE_URL"];
+      $price = $arFields["PRICE"];
+
+      $result = $tracker->eventRemoveFromCart($product_id, $qnt);
 
 
-        return true;
+      return true;
     }
 
     static function order($ID, $fuserID, $strLang, $arDiscounts)
@@ -327,74 +337,74 @@ class cConveadTracker {
       }
 
     static function view() {
-        return true;
-        $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
-        if (!$api_key)
-            return;
+      return true;
+      $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
+      if (!$api_key)
+        return;
 
-        global $USER;
-        global $APPLICATION;
-
-
-
-
-        
-        $visitor_info = false;
-        $visitor_uid = false;
-        if ($USER->GetID() && $USER->GetID() > 0 && $visitor_info = self::getVisitorInfo($USER->GetID())) {
-            $visitor_uid = $USER->GetID();
-        }
-        $guest_uid = self::getUid($visitor_uid);
-        $title = $APPLICATION->GetTitle();
-        $url = $APPLICATION->GetCurUri();
-        if (self::endsWith($url, "ajax.php?UPDATE_STATE")) {
-            return;
-        } elseif (self::startsWith($url, "/bitrix/admin/")) {
-            return;
-        } elseif (self::contains($url, "/bitrix/tools/captcha.php")) {
-            return;
-        } elseif (self::contains($url, "bitrix/tools/autosave.php?bxsender=core_autosave")) {
-            return;
-        }
-
-
-        $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
-
-        $result = $tracker->view($url, $title);
+      global $USER;
+      global $APPLICATION;
 
 
 
-        return true;
+
+
+      $visitor_info = false;
+      $visitor_uid = false;
+      if ($USER->GetID() && $USER->GetID() > 0 && $visitor_info = self::getVisitorInfo($USER->GetID())) {
+        $visitor_uid = $USER->GetID();
+      }
+      $guest_uid = self::getUid($visitor_uid);
+      $title = $APPLICATION->GetTitle();
+      $url = $APPLICATION->GetCurUri();
+      if (self::endsWith($url, "ajax.php?UPDATE_STATE")) {
+        return;
+      } elseif (self::startsWith($url, "/bitrix/admin/")) {
+        return;
+      } elseif (self::contains($url, "/bitrix/tools/captcha.php")) {
+        return;
+      } elseif (self::contains($url, "bitrix/tools/autosave.php?bxsender=core_autosave")) {
+        return;
+      }
+
+
+      $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
+
+      $result = $tracker->view($url, $title);
+
+
+
+      return true;
     }
 
     static function HeadScript($api_key)
       {
         $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
         if (!$api_key)
-            return;
+          return;
 
         global $USER;
         global $APPLICATION;
 
         $url = $APPLICATION->GetCurUri();
         if (self::startsWith($url, "/bitrix/admin/")) {
-            return;
+          return;
         }
 
-        
+
         $visitor_info = false;
         $visitor_uid = false;
         if ($USER && $USER->GetID() && $USER->GetID() > 0 && $visitor_info = self::getVisitorInfo($USER->GetID())) {
-            $visitor_uid = $USER->GetID();
+          $visitor_uid = $USER->GetID();
         }
         $guest_uid = self::getUid($visitor_uid);
         $vi = "";
         if ($visitor_info) {
-            foreach ($visitor_info as $key => $val) {
-                $vi.="\n" . $key . ": '" . $val . "',";
-            }
+          foreach ($visitor_info as $key => $val) {
+            $vi.="\n" . $key . ": '" . $val . "',";
+          }
 
-            $vi = substr($vi, 1, strlen($vi) - 2);
+          $vi = substr($vi, 1, strlen($vi) - 2);
         }
 
         $head = "<!-- Convead Widget -->
@@ -416,8 +426,8 @@ class cConveadTracker {
                     </script>
                     <!-- /Convead Widget -->";
         if(isset($_SESSION["CONVEAD_PRODUCT_ID"])){
-            
-            $head1 = "<!-- Convead view product -->
+
+          $head1 = "<!-- Convead view product -->
                     <script>
                     var callback = function(event) { 
                       convead('event', 'view_product', {
@@ -432,14 +442,14 @@ class cConveadTracker {
                     
                     </script>
                     <!-- /Convead view product -->";
-            //echo $head1;
+          //echo $head1;
 
-            $_SESSION["CONVEAD_PRODUCT_ID"] = null;
-            $_SESSION["CONVEAD_PRODUCT_NAME"] = null;
-            $_SESSION["CONVEAD_PRODUCT_URL"] = null;
-            unset($_SESSION["CONVEAD_PRODUCT_ID"]);
-            unset($_SESSION["CONVEAD_PRODUCT_NAME"]);
-            unset($_SESSION["CONVEAD_PRODUCT_URL"]);
+          $_SESSION["CONVEAD_PRODUCT_ID"] = null;
+          $_SESSION["CONVEAD_PRODUCT_NAME"] = null;
+          $_SESSION["CONVEAD_PRODUCT_URL"] = null;
+          unset($_SESSION["CONVEAD_PRODUCT_ID"]);
+          unset($_SESSION["CONVEAD_PRODUCT_NAME"]);
+          unset($_SESSION["CONVEAD_PRODUCT_URL"]);
         }
         return $head.$head1;
       }
@@ -498,56 +508,56 @@ class cConveadTracker {
     static function productViewCustom($id, $arFields) {
 
       if($arFields["PRODUCT_ID"])
-            $arResult["PRODUCT_ID"] = $arFields["PRODUCT_ID"];
-        else if($id["PRODUCT_ID"])
-            $arResult["PRODUCT_ID"] = $id["PRODUCT_ID"];
-        else
-            return true;
-
-        if (self::contains($_SERVER["HTTP_USER_AGENT"], "facebook.com")) {
-            return;
-        }
-
-
-        $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
-        if (!$api_key)
-            return;
-
-        global $APPLICATION;
-        global $USER;
-        
-        $visitor_uid = false;
-        if(!$user_id)
-            $user_id = $USER->GetID();
-
-        $visitor_info = false;
-        if ($user_id && $visitor_info = self::getVisitorInfo($user_id)) {
-            $visitor_uid = (int) $user_id;
-        }
-        $guest_uid = self::getUid($visitor_uid);
-        $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
-
-        $arProduct = CCatalogProduct::GetByIDEx($arResult["PRODUCT_ID"]);
-
-        $product_id = $arResult["PRODUCT_ID"];
-        $product_name = $arProduct["NAME"];
-        $product_url = "http://" . SITE_SERVER_NAME . $arProduct["DETAIL_PAGE_URL"];
-        
-        $result = $tracker->eventProductView($product_id, $product_name, $product_url, $APPLICATION->GetCurPage());
-
+        $arResult["PRODUCT_ID"] = $arFields["PRODUCT_ID"];
+      else if($id["PRODUCT_ID"])
+        $arResult["PRODUCT_ID"] = $id["PRODUCT_ID"];
+      else
         return true;
+
+      if (self::contains($_SERVER["HTTP_USER_AGENT"], "facebook.com")) {
+        return;
+      }
+
+
+      $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
+      if (!$api_key)
+        return;
+
+      global $APPLICATION;
+      global $USER;
+
+      $visitor_uid = false;
+      if(!$user_id)
+        $user_id = $USER->GetID();
+
+      $visitor_info = false;
+      if ($user_id && $visitor_info = self::getVisitorInfo($user_id)) {
+        $visitor_uid = (int) $user_id;
+      }
+      $guest_uid = self::getUid($visitor_uid);
+      $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
+
+      $arProduct = CCatalogProduct::GetByIDEx($arResult["PRODUCT_ID"]);
+
+      $product_id = $arResult["PRODUCT_ID"];
+      $product_name = $arProduct["NAME"];
+      $product_url = "http://" . SITE_SERVER_NAME . $arProduct["DETAIL_PAGE_URL"];
+
+      $result = $tracker->eventProductView($product_id, $product_name, $product_url, $APPLICATION->GetCurPage());
+
+      return true;
     }
 
     private static function startsWith($haystack, $needle) {
-        return $needle === "" || strpos($haystack, $needle) === 0;
+      return $needle === "" || strpos($haystack, $needle) === 0;
     }
 
     private static function endsWith($haystack, $needle) {
-        return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
+      return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
     }
 
     private static function contains($haystack, $needle) {
-        return $needle === "" || strpos($haystack, $needle) !== false;
+      return $needle === "" || strpos($haystack, $needle) !== false;
     }
 
-}
+  }
