@@ -85,7 +85,7 @@ class cConveadTracker {
             $visitor_uid = (int)$user_id;
           }
         $guest_uid = self::getUid($visitor_uid);
-        $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
+        $tracker = new ConveadTracker($api_key, SITE_SERVER_NAME, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
 
         $arProduct = CCatalogProduct::GetByIDEx($arResult["PRODUCT_ID"]);
         if ($arProduct && strpos($APPLICATION->GetCurPage(), $arProduct["DETAIL_PAGE_URL"]) !== false)
@@ -124,7 +124,7 @@ class cConveadTracker {
                 $_SESSION["LAST_VIEW_ID"] = $arResult["PRODUCT_ID"];
                 return true;
               }
-            //$result = $tracker->eventProductView($product_id, $product_name, $product_url, $APPLICATION->GetCurPage());
+            //$result = $tracker->eventProductView($product_id, $product_name, $product_url);
 
             return true;
           }
@@ -149,7 +149,7 @@ class cConveadTracker {
 
       }
       $guest_uid = self::getUid(false);
-      $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
+      $tracker = new ConveadTracker($api_key, SITE_SERVER_NAME, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
 
 
       $url = "http://" . SITE_SERVER_NAME . "/login";
@@ -173,7 +173,7 @@ class cConveadTracker {
       }
       $guest_uid = self::getUid($visitor_uid);
 
-      $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
+      $tracker = new ConveadTracker($api_key, SITE_SERVER_NAME, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
 
       $product_id = $arFields["PRODUCT_ID"];
       $qnt = $arFields["QUANTITY"];
@@ -181,7 +181,7 @@ class cConveadTracker {
       $product_url = "http://" . SITE_SERVER_NAME . $arFields["DETAIL_PAGE_URL"];
       $price = $arFields["PRICE"];
 
-      $result = $tracker->eventAddToCart($product_id, $qnt, $product_name, $product_url, $price);
+      $result = $tracker->eventAddToCart($product_id, $qnt, $price, $product_name, $product_url);
 
       return true;
     }
@@ -247,7 +247,7 @@ class cConveadTracker {
       }
       $guest_uid = self::getUid($visitor_uid);
 
-      $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
+      $tracker = new ConveadTracker($api_key, SITE_SERVER_NAME, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
 
       $result = $tracker->eventUpdateCart($items);
 
@@ -268,7 +268,7 @@ class cConveadTracker {
         $visitor_uid = $arFields["FUSER_ID"];
       }
       $guest_uid = self::getUid($visitor_uid);
-      $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
+      $tracker = new ConveadTracker($api_key, SITE_SERVER_NAME, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
 
       $product_id = $arFields["PRODUCT_ID"];
       $qnt = $arFields["QUANTITY"];
@@ -311,7 +311,7 @@ class cConveadTracker {
                     $visitor_info["phone"] = $_POST[$phone_name];
                   }
 
-                $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
+                $tracker = new ConveadTracker($api_key, SITE_SERVER_NAME, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
 
                 $items = array();
                 $orders = CSaleBasket::GetList(array(), array(
@@ -368,7 +368,7 @@ class cConveadTracker {
       }
 
 
-      $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
+      $tracker = new ConveadTracker($api_key, SITE_SERVER_NAME, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
 
       $result = $tracker->view($url, $title);
 
@@ -535,7 +535,7 @@ class cConveadTracker {
         $visitor_uid = (int) $user_id;
       }
       $guest_uid = self::getUid($visitor_uid);
-      $tracker = new ConveadTracker($api_key, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
+      $tracker = new ConveadTracker($api_key, SITE_SERVER_NAME, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
 
       $arProduct = CCatalogProduct::GetByIDEx($arResult["PRODUCT_ID"]);
 
@@ -543,7 +543,7 @@ class cConveadTracker {
       $product_name = $arProduct["NAME"];
       $product_url = "http://" . SITE_SERVER_NAME . $arProduct["DETAIL_PAGE_URL"];
 
-      $result = $tracker->eventProductView($product_id, $product_name, $product_url, $APPLICATION->GetCurPage());
+      $result = $tracker->eventProductView($product_id, $product_name, $product_url);
 
       return true;
     }

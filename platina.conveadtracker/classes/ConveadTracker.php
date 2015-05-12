@@ -1,26 +1,29 @@
 <?php
 
 /**
- * ����� ��� ������ � �������� convead.io
+ * Класс для работы с сервисом convead.io
  */
 class ConveadTracker {
 
-    private $brovser;
+    private $browser;
     private $api_key;
     private $guest_uid;
     private $visitor_info = false;
     private $visitor_uid = false;
-    private $referer = false;
+    private $referrer = false;
     private $api_page = "http://tracker.convead.io/watch/event";
     private $url = false;
+    private $domain = false;
+    private $charset = 'utf-8';
 
     /**
      * 
      * @param type $api_key
+     * @param type $domain
      * @param type $guest_uid
      * @param type $visitor_uid
-     * @param type $visitor_info ��������� � ����������� �������� �������� (��� ��������� ������������) ���������� ����:
-      {
+     * @param type $visitor_info структура с параметрами текущего визитора (все параметры опциональные) следующего вида:
+      [
       first_name: 'Name',
       last_name: 'Surname',
       email: 'email',
@@ -31,29 +34,32 @@ class ConveadTracker {
       custom_field_1: 'custom value 1',
       custom_field_2: 'custom value 2',
       ...
-      }
-     * @param type $referer
+      ]
+     * @param type $referrer
+     * @param type $url
      */
-    public function __construct($api_key, $guest_uid, $visitor_uid = false, $visitor_info = false, $referer = false, $url = false) {
+    public function __construct($api_key, $domain, $guest_uid, $visitor_uid = false, $visitor_info = false, $referrer = false, $url = false) {
         if (!class_exists('Browser')) {
-            require __DIR__ . '/Browser.php';
+            require 'Browser.php';
         }
 
-        $this->brovser = new Browser();
+        $this->browser = new Browser();
         $this->api_key = $api_key;
+        $this->domain = $domain;
         $this->guest_uid = $guest_uid;
         $this->visitor_info = $visitor_info;
         //if(!$visitor_uid)
         //  $this->visitor_uid = "";
         //else
         $this->visitor_uid = $visitor_uid;
-        $this->referer = $referer;
+        $this->referrer = $referrer;
         $this->url = $url;
     }
 
     private function getDefaultPost() {
         $post = array();
         $post["app_key"] = $this->api_key;
+        $post["domain"] = $this->domain;
 
         if ($this->guest_uid)
             $post["guest_uid"] = $this->guest_uid;
@@ -65,11 +71,10 @@ class ConveadTracker {
         else
             $post["visitor_uid"] = "";
 
-        $this->referrer && $post["referrer"] = $this->referrer;
-        $this->visitor_info && $post["visitor_info"] = $this->visitor_info;
+        if ($this->referrer) $post["referrer"] = $this->referrer;
+        if (is_array($this->visitor_info)) $post["visitor_info"] = $this->visitor_info;
         if ($this->url) {
             $post["url"] = "http://" . $this->url;
-            $post["domain"] = $this->url;
             $post["host"] = $this->url;
             //$post["path"] = $this->url;
         }
@@ -78,79 +83,82 @@ class ConveadTracker {
 
     /**
      * 
-     * @param type $product_id ID ������ � �������� (����� ��, ��� � XML-���� ������.������/Google Merchant)
-     * @param type $product_name ������������ ������
-     * @param type $product_url ���������� URL ������
+     * @param type $product_id ID товара в магазине (такой же, как в XML-фиде Яндекс.Маркет/Google Merchant)
+     * @param type $product_name наименование товара
+     * @param type $product_url постоянный URL товара
      */
-    public function eventProductView($product_id, $product_name = false, $product_url = false, $path) {
+    public function eventProductView($product_id, $product_name = false, $product_url = false) {
 
         $post = $this->getDefaultPost();
         $post["type"] = "view_product";
-        $post["path"] = $path;
         $post["properties"]["product_id"] = $product_id;
-        $product_name && $post["properties"]["product_name"] = $product_name;
-        $product_url && $post["properties"]["product_url"] = $product_url;
+        if ($product_name) $post["properties"]["product_name"] = $product_name;
+        if ($product_url) $post["properties"]["product_url"] = $product_url;
         //error_reporting(E_ALL);
         $post = $this->json_encode($post);
         $this->putLog($post);
         //echo $post; die();
-        if ($this->brovser->get($this->api_page, $post) === true)
+        if ($this->browser->get($this->api_page, $post) === true)
             return true;
         else
-            return $this->brovser->error;
+            return $this->browser->error;
     }
 
     /**
      * 
-     * @param type $product_id - ID ������ � �������� (����� ��, ��� � XML-���� ������.������/Google Merchant)
-     * @param type $qnt ���������� ��. ������������ ������
-     * @param type $product_name ������������ ������
-     * @param type $product_url ���������� URL ������
-     * @param type $price ��������� 1 ��. ������������ ������
+     * @param type $product_id - ID товара в магазине (такой же, как в XML-фиде Яндекс.Маркет/Google Merchant)
+     * @param type $qnt количество ед. добавляемого товара
+     * @param type $price стоимость 1 ед. добавляемого товара
+     * @param type $product_name наименование товара
+     * @param type $product_url постоянный URL товара
      * @return boolean
      */
-    public function eventAddToCart($product_id, $qnt, $product_name = false, $product_url = false, $price = false) {
+    public function eventAddToCart($product_id, $qnt, $price, $product_name = false, $product_url = false) {
         $post = $this->getDefaultPost();
         $post["type"] = "add_to_cart";
         $post["properties"]["product_id"] = $product_id;
         $post["properties"]["qnt"] = $qnt;
-        $product_name && $post["properties"]["product_name"] = $product_name;
-        $product_url && $post["properties"]["product_url"] = $product_url;
-        $price && $post["properties"]["price"] = $price;
+        $post["properties"]["price"] = $price;
+        if ($product_name) $post["properties"]["product_name"] = $product_name;
+        if ($product_url) $post["properties"]["product_url"] = $product_url;
 
         $post = $this->json_encode($post);
         $this->putLog($post);
-        if ($this->brovser->get($this->api_page, $post) === true)
+        if ($this->browser->get($this->api_page, $post) === true)
             return true;
         else
-            return $this->brovser->error;
+            return $this->browser->error;
     }
 
     /**
      * 
-     * @param type $product_id ID ������ � �������� (����� ��, ��� � XML-���� ������.������/Google Merchant)
-     * @param type $qnt ���������� ��. ������������ ������
+     * @param type $product_id ID товара в магазине (такой же, как в XML-фиде Яндекс.Маркет/Google Merchant)
+     * @param type $qnt количество ед. добавляемого товара
+     * @param type $product_name наименование товара
+     * @param type $product_url постоянный URL товара
      * @return boolean
      */
-    public function eventRemoveFromCart($product_id, $qnt) {
+    public function eventRemoveFromCart($product_id, $qnt, $product_name = false, $product_url = false) {
         $post = $this->getDefaultPost();
         $post["type"] = "remove_from_cart";
         $post["properties"]["product_id"] = $product_id;
         $post["properties"]["qnt"] = $qnt;
+        if ($product_name) $post["properties"]["product_name"] = $product_name;
+        if ($product_url) $post["properties"]["product_url"] = $product_url;
 
         $post = $this->json_encode($post);
         $this->putLog($post);
-        if ($this->brovser->get($this->api_page, $post) === true)
+        if ($this->browser->get($this->api_page, $post) === true)
             return true;
         else
-            return $this->brovser->error;
+            return $this->browser->error;
     }
 
     /**
      * 
-     * @param type $order_id - ID ������ � ��������-��������
-     * @param type $revenue - ����� ����� ������
-     * @param type $order_array JSON-��������� ����:
+     * @param type $order_id - ID заказа в интернет-магазине
+     * @param type $revenue - общая сумма заказа
+     * @param type $order_array JSON-структура вида:
       [
       {id: <product_id>, qnt: <product_count>, price: <product_price>},
       {...}
@@ -163,8 +171,8 @@ class ConveadTracker {
         $properties = array();
         $properties["order_id"] = $order_id;
 
-        $revenue && $properties["revenue"] = $revenue;
-        $order_array && $properties["items"] = $order_array;
+        if ($revenue) $properties["revenue"] = $revenue;
+        if (is_array($order_array)) $properties["items"] = $order_array;
 
         $post["properties"] = $properties;
         //unset($post["domain"]);
@@ -174,12 +182,21 @@ class ConveadTracker {
         $post = $this->json_encode($post);
         $this->putLog($post);
 
-        if ($this->brovser->get($this->api_page, $post) === true)
+        if ($this->browser->get($this->api_page, $post) === true)
             return true;
         else
-            return $this->brovser->error;
+            return $this->browser->error;
     }
 
+    /**
+     * 
+     * @param type $order_array JSON-структура вида:
+      [
+      {id: <product_id>, qnt: <product_count>, price: <product_price>},
+      {...}
+      ]
+     * @return boolean
+     */
     public function eventUpdateCart($order_array) {
         $post = $this->getDefaultPost();
         $post["type"] = "update_cart";
@@ -192,10 +209,10 @@ class ConveadTracker {
         $post = $this->json_encode($post);
         $this->putLog($post);
 
-        if ($this->brovser->get($this->api_page, $post) === true)
+        if ($this->browser->get($this->api_page, $post) === true)
             return true;
         else
-            return $this->brovser->error;
+            return $this->browser->error;
     }
 
     public function view($url, $title) {
@@ -209,10 +226,10 @@ class ConveadTracker {
 
         $this->putLog($post);
 
-        if ($this->brovser->get($this->api_page, $post) === true)
+        if ($this->browser->get($this->api_page, $post) === true)
             return true;
         else
-            return $this->brovser->error;
+            return $this->browser->error;
     }
 
     private function putLog($message) {
@@ -223,7 +240,7 @@ class ConveadTracker {
     }
 
     private function json_encode($text) {
-        if (LANG_CHARSET == "windows-1251") {
+        if ($this->charset == "windows-1251") {
             return json_encode($this->json_fix($text));
         } else {
             return json_encode($text);
