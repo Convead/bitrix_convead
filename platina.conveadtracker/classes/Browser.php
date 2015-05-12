@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Êëàññ äëÿ ðàáîòû ñ post çàïðîñàìè
+ * ÐšÐ»Ð°ÑÑ Ð´Ð»Ñ Ñ€Ð°Ð±Ð¾Ñ‚Ñ‹ Ñ post Ð·Ð°Ð¿Ñ€Ð¾ÑÐ°Ð¼Ð¸
  */
 class Browser {
 
@@ -76,9 +76,7 @@ class Browser {
 
         $curl = curl_init($url);
 
-
         curl_setopt($curl, CURLOPT_FAILONERROR, true);
-        //curl_setopt($curl, CURLOPT_PROXY, '127.0.0.1:8888');
 
         if ($post) {
             curl_setopt($curl, CURLOPT_POST, 1);
@@ -88,7 +86,6 @@ class Browser {
         } else {
             curl_setopt($curl, CURLOPT_POST, false);
         }
-
 
         curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json; charset=utf-8", "Accept:application/json, text/javascript, */*; q=0.01"));
 

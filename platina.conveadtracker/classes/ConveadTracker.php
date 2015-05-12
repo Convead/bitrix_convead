@@ -15,6 +15,7 @@ class ConveadTracker {
     private $url = false;
     private $domain = false;
     private $charset = 'utf-8';
+    private $debug = false;
 
     /**
      * 
@@ -48,9 +49,6 @@ class ConveadTracker {
         $this->domain = $domain;
         $this->guest_uid = $guest_uid;
         $this->visitor_info = $visitor_info;
-        //if(!$visitor_uid)
-        //  $this->visitor_uid = "";
-        //else
         $this->visitor_uid = $visitor_uid;
         $this->referrer = $referrer;
         $this->url = $url;
@@ -76,7 +74,6 @@ class ConveadTracker {
         if ($this->url) {
             $post["url"] = "http://" . $this->url;
             $post["host"] = $this->url;
-            //$post["path"] = $this->url;
         }
         return $post;
     }
@@ -88,16 +85,13 @@ class ConveadTracker {
      * @param type $product_url постоянный URL товара
      */
     public function eventProductView($product_id, $product_name = false, $product_url = false) {
-
         $post = $this->getDefaultPost();
         $post["type"] = "view_product";
         $post["properties"]["product_id"] = $product_id;
         if ($product_name) $post["properties"]["product_name"] = $product_name;
         if ($product_url) $post["properties"]["product_url"] = $product_url;
-        //error_reporting(E_ALL);
         $post = $this->json_encode($post);
         $this->putLog($post);
-        //echo $post; die();
         if ($this->browser->get($this->api_page, $post) === true)
             return true;
         else
@@ -175,7 +169,6 @@ class ConveadTracker {
         if (is_array($order_array)) $properties["items"] = $order_array;
 
         $post["properties"] = $properties;
-        //unset($post["domain"]);
         unset($post["url"]);
         unset($post["host"]);
         unset($post["path"]);
@@ -233,9 +226,9 @@ class ConveadTracker {
     }
 
     private function putLog($message) {
-        return true;
-        $message = "\n" . date("Y.m.d H:i:s") . $message;
-        $filename = dirname(__FILE__) . "/log.log";
+        if (!$this->debug) return true;
+        $message = date("Y.m.d H:i:s") . " - " . $message . "\n";
+        $filename = dirname(__FILE__) . "/log.txt";
         file_put_contents($filename, $message, FILE_APPEND);
     }
 
