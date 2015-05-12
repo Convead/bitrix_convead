@@ -54,7 +54,7 @@ class cConveadTracker {
     }
 
     static function productView($arResult, $user_id = false)
-      {
+    {
 
         if ($arResult["ID"] != "")
           $arResult["PRODUCT_ID"] = $arResult["ID"];
@@ -63,9 +63,9 @@ class cConveadTracker {
           return false;
 
         if (self::contains($_SERVER["HTTP_USER_AGENT"], "facebook.com"))
-          {
+        {
             return;
-          }
+        }
 
 
         $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
@@ -81,15 +81,15 @@ class cConveadTracker {
 
         $visitor_info = false;
         if ($user_id && $visitor_info = self::getVisitorInfo($user_id))
-          {
+        {
             $visitor_uid = (int)$user_id;
-          }
+        }
         $guest_uid = self::getUid($visitor_uid);
         $tracker = new ConveadTracker($api_key, SITE_SERVER_NAME, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
 
         $arProduct = CCatalogProduct::GetByIDEx($arResult["PRODUCT_ID"]);
         if ($arProduct && strpos($APPLICATION->GetCurPage(), $arProduct["DETAIL_PAGE_URL"]) !== false)
-          {
+        {
             if (CCatalogSku::IsExistOffers($arResult["PRODUCT_ID"]))
               {
                 $arOffers =
@@ -127,37 +127,7 @@ class cConveadTracker {
             //$result = $tracker->eventProductView($product_id, $product_name, $product_url);
 
             return true;
-          }
-      }
-
-    static function login($arResult) {
-
-      $arResult = $arResult["user_fields"];
-      $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
-      if (!$api_key)
-        return;
-
-      global $APPLICATION;
-
-      if(!$arResult["ID"])
-        return;
-
-      $visitor_uid = $arResult["ID"];
-
-      $visitor_info = false;
-      if ($visitor_uid && $visitor_info = self::getVisitorInfo($visitor_uid)) {
-
-      }
-      $guest_uid = self::getUid(false);
-      $tracker = new ConveadTracker($api_key, SITE_SERVER_NAME, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
-
-
-      $url = "http://" . SITE_SERVER_NAME . "/login";
-      $title = "Вход";
-
-      $result = $tracker->view($url, $title);
-
-      return true;
+        }
     }
 
     static function addToCart($arFields) {
@@ -231,9 +201,6 @@ class cConveadTracker {
         $i++;
       }
 
-      //if(count($items) == 0)
-      //    return;
-
       global $USER;
       $user_id = false;
       if($USER->GetID())
@@ -277,7 +244,6 @@ class cConveadTracker {
       $price = $arFields["PRICE"];
 
       $result = $tracker->eventRemoveFromCart($product_id, $qnt);
-
 
       return true;
     }
@@ -345,10 +311,6 @@ class cConveadTracker {
       global $USER;
       global $APPLICATION;
 
-
-
-
-
       $visitor_info = false;
       $visitor_uid = false;
       if ($USER->GetID() && $USER->GetID() > 0 && $visitor_info = self::getVisitorInfo($USER->GetID())) {
@@ -367,18 +329,15 @@ class cConveadTracker {
         return;
       }
 
-
       $tracker = new ConveadTracker($api_key, SITE_SERVER_NAME, $guest_uid, $visitor_uid, $visitor_info, false, SITE_SERVER_NAME);
 
       $result = $tracker->view($url, $title);
-
-
 
       return true;
     }
 
     static function HeadScript($api_key)
-      {
+    {
         $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
         if (!$api_key)
           return;
@@ -390,7 +349,6 @@ class cConveadTracker {
         if (self::startsWith($url, "/bitrix/admin/")) {
           return;
         }
-
 
         $visitor_info = false;
         $visitor_uid = false;
@@ -442,7 +400,6 @@ class cConveadTracker {
                     
                     </script>
                     <!-- /Convead view product -->";
-          //echo $head1;
 
           $_SESSION["CONVEAD_PRODUCT_ID"] = null;
           $_SESSION["CONVEAD_PRODUCT_NAME"] = null;
@@ -452,7 +409,7 @@ class cConveadTracker {
           unset($_SESSION["CONVEAD_PRODUCT_URL"]);
         }
         return $head.$head1;
-      }
+    }
 
     static function head()
       {
@@ -480,30 +437,29 @@ class cConveadTracker {
 
 
         if (CHTMLPagesCache::IsOn())
-          {
+        {
             $frame = new \Bitrix\Main\Page\FrameHelper("platina_conveadtracker");
             $frame->begin();
             $actionType = \Bitrix\Main\Context::getCurrent()->getServer()->get("HTTP_BX_ACTION_TYPE");
             if (true/*$actionType == "get_dynamic"*/)
-              {
+            {
                 echo self::HeadScript($api_key);
-              }
+            }
             $frame->beginStub();
             $frame->end();
-          }
+        }
         else
-          {
+        {
             global $APPLICATION;
             $APPLICATION->AddHeadString(self::HeadScript($api_key), false, true);
-          }
+        }
 
         @session_start();
         $_SESSION["VIEWED_PRODUCT"]=0;
         unset($_SESSION["VIEWED_ENABLE"]);
 
         return true;
-      }
-
+    }
 
     static function productViewCustom($id, $arFields) {
 
@@ -517,7 +473,6 @@ class cConveadTracker {
       if (self::contains($_SERVER["HTTP_USER_AGENT"], "facebook.com")) {
         return;
       }
-
 
       $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
       if (!$api_key)
