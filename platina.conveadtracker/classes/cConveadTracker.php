@@ -32,25 +32,8 @@ class cConveadTracker {
     }
 
     static function getUid($visitor_uid) {
-      if($visitor_uid){
-        self::resetUid ();
-
-        return false;
-      }
-
-      if (isset($_COOKIE["convead_guest_uid"]))
-        return $_COOKIE["convead_guest_uid"];
-      else {
-        $key = isset($_SESSION["UNIQUE_KEY"]) ? $_SESSION["UNIQUE_KEY"] . time() : time();
-        $uid = substr(md5($key), 1, 16);
-        @setcookie("convead_guest_uid", $uid, 0, "/");
-        return $uid;
-      }
-    }
-
-    static function resetUid() {
-      unset($_COOKIE['convead_guest_uid']);
-      @setcookie("convead_guest_uid", "", time() - 3600, "/");
+      if ($visitor_uid) return false;
+      else return $_COOKIE["convead_guest_uid"];
     }
 
     static function productView($arResult, $user_id = false)
