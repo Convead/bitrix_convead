@@ -87,7 +87,7 @@ class Browser {
             curl_setopt($curl, CURLOPT_POST, false);
         }
 
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json; charset=utf-8", "Accept:application/json, text/javascript, */*; q=0.01"));
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/x-www-form-urlencoded; charset=utf-8", "Accept:application/json, text/javascript, */*; q=0.01"));
 
         curl_exec($curl);
 

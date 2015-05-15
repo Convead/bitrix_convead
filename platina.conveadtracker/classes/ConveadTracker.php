@@ -90,7 +90,7 @@ class ConveadTracker {
         $post["properties"]["product_id"] = $product_id;
         if ($product_name) $post["properties"]["product_name"] = $product_name;
         if ($product_url) $post["properties"]["product_url"] = $product_url;
-        $post = $this->json_encode($post);
+        $post = $this->post_encode($post);
         $this->putLog($post);
         if ($this->browser->get($this->api_page, $post) === true)
             return true;
@@ -116,7 +116,7 @@ class ConveadTracker {
         if ($product_name) $post["properties"]["product_name"] = $product_name;
         if ($product_url) $post["properties"]["product_url"] = $product_url;
 
-        $post = $this->json_encode($post);
+        $post = $this->post_encode($post);
         $this->putLog($post);
         if ($this->browser->get($this->api_page, $post) === true)
             return true;
@@ -140,7 +140,7 @@ class ConveadTracker {
         if ($product_name) $post["properties"]["product_name"] = $product_name;
         if ($product_url) $post["properties"]["product_url"] = $product_url;
 
-        $post = $this->json_encode($post);
+        $post = $this->post_encode($post);
         $this->putLog($post);
         if ($this->browser->get($this->api_page, $post) === true)
             return true;
@@ -172,7 +172,7 @@ class ConveadTracker {
         unset($post["url"]);
         unset($post["host"]);
         unset($post["path"]);
-        $post = $this->json_encode($post);
+        $post = $this->post_encode($post);
         $this->putLog($post);
 
         if ($this->browser->get($this->api_page, $post) === true)
@@ -199,7 +199,7 @@ class ConveadTracker {
 
         $post["properties"] = $properties;
 
-        $post = $this->json_encode($post);
+        $post = $this->post_encode($post);
         $this->putLog($post);
 
         if ($this->browser->get($this->api_page, $post) === true)
@@ -215,7 +215,7 @@ class ConveadTracker {
         $post["url"] = "http://" . $this->url . $url;
         $post["path"] = $url;
 
-        $post = $this->json_encode($post);
+        $post = $this->post_encode($post);
 
         $this->putLog($post);
 
@@ -228,8 +228,26 @@ class ConveadTracker {
     private function putLog($message) {
         if (!$this->debug) return true;
         $message = date("Y.m.d H:i:s") . " - " . $message . "\n";
-        $filename = dirname(__FILE__) . "/log.txt";
+        $filename = dirname(__FILE__) . "/debug.log";
         file_put_contents($filename, $message, FILE_APPEND);
+    }
+
+    private function post_encode($post) {
+        $ret_post = array(
+            'app_key' => $post['app_key'],
+            'visitor_uid' => $post['visitor_uid'],
+            'guest_uid' => $post['guest_uid'],
+            'data' => $this->json_encode($post)
+          );
+        return $this->build_http_query($ret_post);
+    }
+  
+    private function build_http_query($query) {
+        $query_array = array();
+        foreach( $query as $key => $key_value ){
+            $query_array[] = urlencode( $key ) . '=' . urlencode( $key_value );
+        }
+        return implode('&', $query_array);
     }
 
     private function json_encode($text) {
