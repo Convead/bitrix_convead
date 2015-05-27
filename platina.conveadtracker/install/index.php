@@ -13,8 +13,8 @@ if (class_exists('platina_conveadtracker')) {
 class platina_conveadtracker extends CModule {
 
     var $MODULE_ID = 'platina.conveadtracker';
-    var $MODULE_VERSION = '0.0.1';
-    var $MODULE_VERSION_DATE = '2014-10-01 16:23:14';
+    var $MODULE_VERSION = '1.1.1';
+    var $MODULE_VERSION_DATE = '2015-05-27 12:00:00';
     var $MODULE_NAME;
     var $MODULE_DESCRIPTION;
     var $MODULE_GROUP_RIGHTS = 'N';
