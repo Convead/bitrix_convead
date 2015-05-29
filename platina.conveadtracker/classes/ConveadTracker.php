@@ -46,7 +46,10 @@ class ConveadTracker {
 
         $this->browser = new Browser();
         $this->api_key = $api_key;
-        $this->domain = $domain;
+        
+        $domain_encoding = mb_detect_encoding($domain, array('UTF-8', 'windows-1251'));
+        $this->domain = mb_strtolower( (($domain_encoding == 'UTF-8') ? $domain : iconv($domain_encoding, 'UTF-8', $domain)) , 'UTF-8');
+        
         $this->guest_uid = $guest_uid;
         $this->visitor_info = $visitor_info;
         $this->visitor_uid = $visitor_uid;
@@ -282,3 +285,4 @@ class ConveadTracker {
     }
 
 }
+
