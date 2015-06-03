@@ -4,6 +4,7 @@
  * Класс для работы с сервисом convead.io
  */
 class ConveadTracker {
+    public $version = '1.1.1';
 
     private $browser;
     private $api_key;
@@ -73,7 +74,7 @@ class ConveadTracker {
             $post["visitor_uid"] = "";
 
         if ($this->referrer) $post["referrer"] = $this->referrer;
-        if (is_array($this->visitor_info)) $post["visitor_info"] = $this->visitor_info;
+        if (is_array($this->visitor_info) and count($this->visitor_info)) $post["visitor_info"] = $this->visitor_info;
         if ($this->url) {
             $post["url"] = "http://" . $this->url;
             $post["host"] = $this->url;
@@ -186,7 +187,7 @@ class ConveadTracker {
 
     /**
      * 
-     * @param type $order_array JSON-структура вида:
+     * @param array $order_array JSON-структура вида:
       [
       {id: <product_id>, qnt: <product_count>, price: <product_price>},
       {...}
@@ -211,6 +212,33 @@ class ConveadTracker {
             return $this->browser->error;
     }
 
+    /**
+     * 
+     * @param string $key - имя кастомного ключа
+     * @param array $properties - передаваемые свойства
+     * @return boolean
+     */
+    public function eventCustom($key, $properties = array()) {
+        $post = $this->getDefaultPost();
+        $post["type"] = "custom";
+        $properties["key"] = $key;
+        $post["properties"] = $properties;
+
+        $post = $this->post_encode($post);
+        $this->putLog($post);
+
+        if ($this->browser->get($this->api_page, $post) === true)
+            return true;
+        else
+            return $this->browser->error;
+    }
+
+    /**
+     * 
+     * @param string $url - url адрес страницы
+     * @param string $title - заголовок страницы
+     * @return boolean
+     */
     public function view($url, $title) {
         $post = $this->getDefaultPost();
         $post["type"] = "link";
@@ -285,4 +313,3 @@ class ConveadTracker {
     }
 
 }
-
