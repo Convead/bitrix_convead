@@ -93,7 +93,7 @@ class cConveadTracker {
               }
 
             $_SESSION["CONVEAD_PRODUCT_ID"] = $arResult["PRODUCT_ID"];
-            $_SESSION["CONVEAD_PRODUCT_NAME"] = $arProduct["NAME"];
+            $_SESSION["CONVEAD_PRODUCT_NAME"] = str_replace("'", '&#039;', $arProduct["NAME"]);
             $_SESSION["CONVEAD_PRODUCT_URL"] = "http://" . SITE_SERVER_NAME . $arProduct["DETAIL_PAGE_URL"];
 
             $product_id = $arResult["PRODUCT_ID"];
@@ -478,7 +478,7 @@ class cConveadTracker {
       $arProduct = CCatalogProduct::GetByIDEx($arResult["PRODUCT_ID"]);
 
       $product_id = $arResult["PRODUCT_ID"];
-      $product_name = $arProduct["NAME"];
+      $product_name = str_replace("'", '&#039;', $arProduct["NAME"]);
       $product_url = "http://" . SITE_SERVER_NAME . $arProduct["DETAIL_PAGE_URL"];
 
       $result = $tracker->eventProductView($product_id, $product_name, $product_url);
