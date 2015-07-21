@@ -306,7 +306,9 @@ class cConveadTracker {
         return;
       } elseif (self::startsWith($url, "/bitrix/admin/")) {
         return;
-      } elseif (self::contains($url, "/bitrix/tools/captcha.php")) {
+      } elseif (self::startsWith($url, "/admin/")) {
+        return;
+      } elseif (self::contains($url, "/bitrix/tools")) {
         return;
       } elseif (self::contains($url, "bitrix/tools/autosave.php?bxsender=core_autosave")) {
         return;
@@ -405,7 +407,9 @@ class cConveadTracker {
           return;
         } elseif (self::startsWith($url, "/bitrix/admin/")) {
           return;
-        } elseif (self::contains($url, "/bitrix/tools/captcha.php")) {
+        } elseif (self::startsWith($url, "/admin/")) {
+          return;
+        } elseif (self::contains($url, "/bitrix/tools")) {
           return;
         } elseif (self::contains($url, "bitrix/tools/autosave.php?bxsender=core_autosave")) {
           return;
