@@ -166,7 +166,8 @@ class cConveadTracker {
          array(), array(
          "FUSER_ID" => $basket["FUSER_ID"],
          //"LID" => SITE_ID,
-         "ORDER_ID" => "NULL"
+         "ORDER_ID" => "NULL",
+         "DELAY" => "N"
       ), false, false, array()
       );
       $i = 0;
