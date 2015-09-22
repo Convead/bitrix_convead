@@ -141,6 +141,9 @@ class cConveadTracker {
 
     static function updateCart($id, $arFields = false) {
 
+	    if(self::IsAdminPage())
+		    return true;
+
       if(!class_exists("CCatalogSku"))
         return false;
 
@@ -234,6 +237,9 @@ class cConveadTracker {
 
     static function order($ID, $fuserID, $strLang, $arDiscounts)
       {
+	      if(self::IsAdminPage())
+		      return true;
+
         $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
         if (!$api_key)
           return true;
@@ -358,14 +364,14 @@ class cConveadTracker {
                         " . ($visitor_uid ? "visitor_uid: '$visitor_uid'," : "") . "
                         visitor_info: {
                             $vi
-                        }, 
+                        },
                         app_key: \"$api_key\"
 
                         /* For more information on widget configuration please see:
                            http://convead.uservoice.com/knowledgebase/articles/344831-how-to-embed-a-tracking-code-into-your-websites
                         */
                     };
-                    
+
                     (function(w,d,c){w[c]=w[c]||function(){(w[c].q=w[c].q||[]).push(arguments)};var ts = (+new Date()/86400000|0)*86400;var s = d.createElement('script');s.type = 'text/javascript';s.async = true;s.src = 'https://tracker.convead.io/widgets/'+ts+'/widget-$api_key.js';var x = d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s, x);})(window,document,'convead');
                     </script>
                     <!-- /Convead Widget -->";
@@ -373,17 +379,17 @@ class cConveadTracker {
 
           $head1 = "<!-- Convead view product -->
                     <script>
-                    var callback = function(event) { 
+                    var callback = function(event) {
                       convead('event', 'view_product', {
                             product_id: ".$_SESSION["CONVEAD_PRODUCT_ID"].",
                             product_name: '".$_SESSION["CONVEAD_PRODUCT_NAME"]."',
                             product_url: '".$_SESSION["CONVEAD_PRODUCT_URL"]."'
                           });
-                        
+
                     };
 
                     callback(\"onreadystatechange\");
-                    
+
                     </script>
                     <!-- /Convead view product -->";
 
@@ -399,21 +405,24 @@ class cConveadTracker {
 
     static function head()
       {
+	      if(self::IsAdminPage())
+		      return true;
+
         $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
         if (!$api_key)
-          return;
+          return true;
         global $APPLICATION,$USER;
         $url = $APPLICATION->GetCurUri();
         if (self::endsWith($url, "ajax.php?UPDATE_STATE")) {
-          return;
+          return true;
         } elseif (self::startsWith($url, "/bitrix/admin/")) {
-          return;
+          return true;
         } elseif (self::startsWith($url, "/admin/")) {
-          return;
+          return true;
         } elseif (self::contains($url, "/bitrix/tools")) {
-          return;
+          return true;
         } elseif (self::contains($url, "bitrix/tools/autosave.php?bxsender=core_autosave")) {
-          return;
+          return true;
         }
 
         $visitor_info = false;
@@ -501,6 +510,17 @@ class cConveadTracker {
 
     private static function contains($haystack, $needle) {
       return $needle === "" || strpos($haystack, $needle) !== false;
+    }
+
+    static function IsAdminPage(){
+
+	    global $APPLICATION;
+	    $url = $APPLICATION->GetCurUri();
+
+	    if (self::startsWith($url, "/bitrix/admin/")) {
+		    return true;
+	    }
+	    return false;
     }
 
   }
