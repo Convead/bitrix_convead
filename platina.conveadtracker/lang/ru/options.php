@@ -1,4 +1,6 @@
 <?php
+$MESS['CURL_DISABLED_MESSAGE'] = "Внимание! На хостинге не включена поддержка CURL. Она необходима для работы модуля.";
+$MESS['HOSTING_SUPPORT'] = "Обратитесь в службу техподдержки вашего хостинга.";
 $MESS['MAKE_REDIRECT_NO'] = "Нет";
 $MESS['MAKE_REDIRECT_YES'] = "Да";
 $MESS['MAKE_REDIRECT'] = "Перенаправлять ли посетителя на отдельную \"thank you\" страницу";

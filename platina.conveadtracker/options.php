@@ -67,6 +67,14 @@ if ($RIGHT >= 'R') :
 	<form method="post" action="<?= $APPLICATION->GetCurPage() ?>?mid=<?= urlencode($mid) ?>&amp;lang=<?= LANGUAGE_ID ?>">
 		<? $tabControl->BeginNextTab(); ?>
 
+		<?php if (!function_exists('curl_exec')): ?>
+			<div class="adm-info-message-wrap">
+				<div class="adm-info-message">
+					<span class="required"><?= Loc::getMessage("CURL_DISABLED_MESSAGE") ?></span><br />
+					<?= Loc::getMessage("HOSTING_SUPPORT") ?>
+				</div>
+			</div>
+		<?php endif; ?>
 
 		<tr>
 			<td width="40%">
