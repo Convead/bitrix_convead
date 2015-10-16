@@ -142,7 +142,7 @@ class cConveadTracker {
 	    if(self::IsAdminPage())
 		    return true;
 
-      if(!class_exists("CCatalogSku"))
+      if (!CModule::includeModule('catalog') || !class_exists("CCatalogSku"))
         return false;
 
       $api_key = COption::GetOptionString(self::$MODULE_ID, "tracker_code", '');
