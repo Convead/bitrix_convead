@@ -25,7 +25,10 @@ class platina_conveadtracker extends CModule {
     }
 
     public function DoInstall() {
+        # enable support old events
         COption::SetOptionString("sale", "expiration_processing_events", 'Y');
+        \Bitrix\Main\Config\Option::set("main", "~sale_converted_15", 'N');
+
         RegisterModule($this->MODULE_ID);
         RegisterModuleDependences("sale", "OnBasketAdd", $this->MODULE_ID, "cConveadTracker", "updateCart", "100");
         RegisterModuleDependences("sale", "OnBeforeBasketDelete", $this->MODULE_ID, "cConveadTracker", "updateCart", "100");
