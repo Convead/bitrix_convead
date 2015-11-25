@@ -25,6 +25,7 @@ class platina_conveadtracker extends CModule {
     }
 
     public function DoInstall() {
+        COption::SetOptionString("sale", "expiration_processing_events", 'Y');
         RegisterModule($this->MODULE_ID);
         RegisterModuleDependences("sale", "OnBasketAdd", $this->MODULE_ID, "cConveadTracker", "updateCart", "100");
         RegisterModuleDependences("sale", "OnBeforeBasketDelete", $this->MODULE_ID, "cConveadTracker", "updateCart", "100");

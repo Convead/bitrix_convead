@@ -39,7 +39,7 @@ if ($APPLICATION->GetGroupRight(ADMIN_MODULE_NAME) >= 'R') {
 				$tracker_code_name = "tracker_code_".$arSite['ID'];
 				$phone_code_name = "phone_code_".$arSite['ID'];
 
-				if (!empty($_REQUEST[$tracker_code_name])) {
+				if (isset($_REQUEST[$tracker_code_name])) {
 					COption::SetOptionString(
 						ADMIN_MODULE_NAME,
 						$tracker_code_name,
@@ -47,11 +47,9 @@ if ($APPLICATION->GetGroupRight(ADMIN_MODULE_NAME) >= 'R') {
 						Loc::getMessage("TRACKER_CODE")
 					);
 					$is_saved = true;
-				} else {
-					CAdminMessage::ShowMessage(Loc::getMessage("ERROR_TRACKER_CODE_EMPTY"));
 				}
 
-				if (!empty($_REQUEST[$phone_code_name])) {
+				if (isset($_REQUEST[$phone_code_name])) {
 					COption::SetOptionString(
 						ADMIN_MODULE_NAME,
 						$phone_code_name,
@@ -109,7 +107,8 @@ if ($APPLICATION->GetGroupRight(ADMIN_MODULE_NAME) >= 'R') {
 				<td width="40%">
 					<label for="<?=$tracker_code_name?>"><?= Loc::getMessage("TRACKER_CODE") ?>:</label>
 				<td width="60%">
-					<input type="text" size="50"  name="<?=$tracker_code_name?>" value="<?= htmlspecialcharsbx( $domain_tracker_code ? $domain_tracker_code : $single_tracker_code ) ?>">
+					<input type="text" size="50" name="<?=$tracker_code_name?>" value="<?= htmlspecialcharsbx( $domain_tracker_code ? $domain_tracker_code : $single_tracker_code ) ?>" onkeyup="set_checkbox(this)" class="api_key_input" data-disable-name="disable_<?=$arSite['ID']?>">
+					<input type="checkbox" value="1" name="disable_<?=$arSite['ID']?>" onchange="set_input(this, '<?=$tracker_code_name?>')" />
 				</td>
 			</tr>
 
@@ -117,7 +116,7 @@ if ($APPLICATION->GetGroupRight(ADMIN_MODULE_NAME) >= 'R') {
 				<td width="40%">
 					<label for="<?=$phone_code_name?>"><?= Loc::getMessage("PHONE_CODE") ?>:</label>
 				<td width="60%">
-					<input type="text" size="50"  name="<?=$phone_code_name?>" value="<?= htmlspecialcharsbx( $domain_phone_code ? $domain_phone_code : $single_phone_code ) ?>">
+					<input type="text" size="50" name="<?=$phone_code_name?>" value="<?= htmlspecialcharsbx( $domain_phone_code ? $domain_phone_code : $single_phone_code ) ?>">
 				</td>
 			</tr>
 
@@ -135,6 +134,27 @@ if ($APPLICATION->GetGroupRight(ADMIN_MODULE_NAME) >= 'R') {
 		<? $tabControl->End(); ?>
 
 	</form>
+
+	<script type="text/javascript">
+function set_input(el, name) {
+	var input = document.querySelector('input[name='+name+']');
+	if (!el.checked) input.value = '';
+}
+function set_checkbox(el)
+{
+	if (el.dataset)
+	{
+		var name = el.dataset.disableName;
+		if (el.value.length > 0) document.querySelector('input[name='+name+']').checked = 'checked';
+		else document.querySelector('input[name='+name+']').checked = null;
+	}
+}
+var inputs = document.querySelectorAll('input.api_key_input');
+for(var k in inputs)
+{
+	set_checkbox(inputs[k]);
+}
+	</script>
 
 <?php
 
