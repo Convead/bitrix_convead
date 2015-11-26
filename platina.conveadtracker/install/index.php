@@ -25,7 +25,6 @@ class platina_conveadtracker extends CModule {
     }
 
     public function DoInstall() {
-        COption::SetOptionString("sale", "expiration_processing_events", 'Y');
         RegisterModule($this->MODULE_ID);
         RegisterModuleDependences("sale", "OnBasketAdd", $this->MODULE_ID, "cConveadTracker", "updateCart", "100");
         RegisterModuleDependences("sale", "OnBeforeBasketDelete", $this->MODULE_ID, "cConveadTracker", "updateCart", "100");
@@ -34,6 +33,8 @@ class platina_conveadtracker extends CModule {
         RegisterModuleDependences("main", "OnEpilog", $this->MODULE_ID, "cConveadTracker", "head", "100");
         RegisterModuleDependences("sale", "OnBasketUpdate", $this->MODULE_ID, "cConveadTracker", "updateCart", "100");
         RegisterModuleDependences("sale", "OnBeforeViewedAdd", $this->MODULE_ID, "cConveadTracker", "productView", "100");
+        RegisterModuleDependences("sale", "OnSaleBasketSaved", $this->MODULE_ID, "cConveadTracker", "newEventUpdateCart", "100"); 
+        RegisterModuleDependences("sale", "OnSaleBasketItemSetField", $this->MODULE_ID, "cConveadTracker", "newEventSetQtyCart", "100"); 
         $this->InstallFiles();
         $this->InstallDB();
     }
@@ -46,6 +47,8 @@ class platina_conveadtracker extends CModule {
         UnRegisterModuleDependences("main", "OnEpilog", $this->MODULE_ID, "cConveadTracker", "head");
         UnRegisterModuleDependences("sale", "OnBasketUpdate", $this->MODULE_ID, "cConveadTracker", "updateCart");
         UnRegisterModuleDependences("main", "OnBeforeViewedAdd", $this->MODULE_ID, "cConveadTracker", "productView");
+        UnRegisterModuleDependences("sale", "OnSaleBasketSaved", $this->MODULE_ID, "cConveadTracker", "newEventUpdateCart"); 
+        UnRegisterModuleDependences("sale", "OnSaleBasketItemSetField", $this->MODULE_ID, "cConveadTracker", "newEventSetQtyCart"); 
         $this->UnInstallFiles();
         UnRegisterModule($this->MODULE_ID);
     }

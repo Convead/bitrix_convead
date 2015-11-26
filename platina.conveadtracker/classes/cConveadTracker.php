@@ -86,30 +86,41 @@ class cConveadTracker {
     }
   }
 
-  static function addToCart($arFields) {
-    return true;
+  static function newEventUpdateCart($basket) {
+    if (COption::GetOptionString("sale", "expiration_processing_events") == 'N' and !$basket->getOrderId())
+    {
+      $items = self::getItemsByProperty(array(
+          "FUSER_ID" => $basket->getFUserId(),
+          //"LID" => SITE_ID,
+          "ORDER_ID" => "NULL",
+          "DELAY" => "N"
+        )
+      );
 
-    $visitor_uid = false;
-    $visitor_info = false;
-    if ($arFields["FUSER_ID"] && $arFields["FUSER_ID"] && $visitor_info = self::getVisitorInfo($arFields["FUSER_ID"])) $visitor_uid = $arFields["FUSER_ID"];
+      return self::sendUpdateCart($items);
+    }
+  }
 
-    $guest_uid = self::getUid($visitor_uid);
+  static function newEventSetQtyCart($basketItem, $field, $value)
+  {
+    if ($field == 'QUANTITY' and isset($_REQUEST['action']) and $_REQUEST['action'] == 'recalculate') {
+      $items = self::getItemsByProperty(array(
+          "FUSER_ID" => $basketItem->getCollection()->getFUserId(),
+          //"LID" => SITE_ID,
+          "ORDER_ID" => "NULL",
+          "DELAY" => "N"
+        )
+      );
 
-    if (!$tracker = self::getTracker($guest_uid, $visitor_uid, $visitor_info)) return true;
+      # fix receive data before updating
+      foreach($items as $k=>$item) if ($item['product_id'] == $basketItem->getProductId()) $items[$k]['qnt'] = $value;
 
-    $product_id = $arFields["PRODUCT_ID"];
-    $qnt = $arFields["QUANTITY"];
-    $product_name = $arFields["NAME"];
-    $product_url = self::getDelautPageUrl($arFields);
-    $price = $arFields["PRICE"];
-
-    $result = $tracker->eventAddToCart($product_id, $qnt, $price, $product_name, $product_url);
-
-    return true;
+      return self::sendUpdateCart($items);
+    }
   }
 
   static function updateCart($id, $arFields = false) {
-    if (!self::getCurlUri()) return;
+    if (COption::GetOptionString("sale", "expiration_processing_events") == 'N' or !self::getCurlUri()) return;
 
     if (!CModule::includeModule('catalog') || !class_exists("CCatalogSku")) return false;
 
@@ -119,67 +130,15 @@ class cConveadTracker {
 
     $basket = CSaleBasket::GetByID($id);
 
-    $user_id = $basket["FUSER_ID"];
-    $items = array();
-    $orders = CSaleBasket::GetList(array(), array(
+    $items = self::getItemsByProperty(array(
         "FUSER_ID" => $basket["FUSER_ID"],
         //"LID" => SITE_ID,
         "ORDER_ID" => "NULL",
         "DELAY" => "N"
-      ), false, false, array()
+      ), $id, $arFields
     );
-    $i = 0;
-    while ($order = $orders->Fetch()) {
-      if (!$arFields) {//deleting
-        if ($order["ID"] == $id) continue;
-      }
 
-      $item["product_id"] = $order["PRODUCT_ID"];
-
-      $item["qnt"] = $order["QUANTITY"];
-      $item["price"] = $order["PRICE"];
-      $items[$i . ""] = $item;
-      $i++;
-    }
-
-    global $USER;
-    $user_id = false;
-    if($USER->GetID()) $user_id = $USER->GetID();
-
-    $visitor_uid = false;
-    $visitor_info = false;
-    $visitor_info = self::getVisitorInfo($user_id);
-    if ($visitor_info || $user_id !== FALSE) $visitor_uid = $user_id;
-
-    $guest_uid = self::getUid($visitor_uid);
-
-    if (!$tracker = self::getTracker($guest_uid, $visitor_uid, $visitor_info)) return true;
-
-    $result = $tracker->eventUpdateCart($items);
-
-    return true;
-  }
-
-  static function removeFromCart($id) {
-    return true;
-    $arFields = CSaleBasket::GetByID($id);
-
-    $visitor_uid = false;
-    $visitor_info = false;
-    if ($arFields["FUSER_ID"] && $arFields["FUSER_ID"] && $visitor_info = self::getVisitorInfo($arFields["FUSER_ID"])) $visitor_uid = $arFields["FUSER_ID"];
-
-    $guest_uid = self::getUid($visitor_uid);
-    if (!$tracker = self::getTracker($guest_uid, $visitor_uid, $visitor_info)) return true;
-
-    $product_id = $arFields["PRODUCT_ID"];
-    $qnt = $arFields["QUANTITY"];
-    $product_name = $arFields["NAME"];
-    $product_url = self::getDelautPageUrl($arFields);
-    $price = $arFields["PRICE"];
-
-    $result = $tracker->eventRemoveFromCart($product_id, $qnt);
-
-    return true;
+    return self::sendUpdateCart($items);
   }
 
   static function order($ID, $fuserID, $strLang, $arDiscounts) {
@@ -205,19 +164,11 @@ class cConveadTracker {
 
         if (!$tracker = self::getTracker($guest_uid, $visitor_uid, $visitor_info)) return true;
 
-        $items = array();
-        $orders = CSaleBasket::GetList(array(), array(
+        $items = self::getItemsByProperty(array(
            "ORDER_ID" => $arOrder["ID"]
-        ), false, false, array());
-        $i = 0;
-        while ($order = $orders->Fetch())
-        {
-          $item["product_id"] =  $order["PRODUCT_ID"];
-          $item["qnt"] = $order["QUANTITY"];
-          $item["price"] = $order["PRICE"];
-          $items[$i . ""] = $item;
-          $i++;
-        }
+          )
+        );
+
         if (!empty($items))
         {
           $price = $arOrder["PRICE"] - (isset($arOrder["PRICE_DELIVERY"]) ? $arOrder["PRICE_DELIVERY"] : 0);
@@ -381,6 +332,41 @@ class cConveadTracker {
     $result = $tracker->eventProductView($product_id, $product_name, $product_url);
 
     return true;
+  }
+
+  private function sendUpdateCart($items = array()) {
+    global $USER;
+    $user_id = false;
+    if($USER->GetID()) $user_id = $USER->GetID();
+
+    $visitor_uid = false;
+    $visitor_info = false;
+    $visitor_info = self::getVisitorInfo($user_id);
+    if ($visitor_info || $user_id !== FALSE) $visitor_uid = $user_id;
+
+    $guest_uid = self::getUid($visitor_uid);
+
+    # fix double events
+    if (isset($_SESSION['cnv_old_cart']) and $_SESSION['cnv_old_cart'] == $items) return true;
+    $_SESSION['cnv_old_cart'] = $items;
+
+    if (!$tracker = self::getTracker($guest_uid, $visitor_uid, $visitor_info)) return false;
+    else return $tracker->eventUpdateCart($items);
+  }
+
+  private function getItemsByProperty($property, $id = false, $arFields = true) {
+    $items = array();
+    $orders = CSaleBasket::GetList(array(), $property, false, false, array());
+    while ($order = $orders->Fetch()) {
+      if (!$arFields) {//deleting
+        if ($order["ID"] == $id) continue;
+      }
+      $item["product_id"] = $order["PRODUCT_ID"];
+      $item["qnt"] = $order["QUANTITY"];
+      $item["price"] = $order["PRICE"];
+      $items[] = $item;
+    }
+    return $items;
   }
 
   private static function getUid($visitor_uid) {
