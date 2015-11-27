@@ -350,8 +350,8 @@ class cConveadTracker {
     if (isset($_SESSION['cnv_old_cart']) and $_SESSION['cnv_old_cart'] == $items) return true;
     $_SESSION['cnv_old_cart'] = $items;
 
-    if (!$tracker = self::getTracker($guest_uid, $visitor_uid, $visitor_info)) return false;
-    else return $tracker->eventUpdateCart($items);
+    if ($tracker = self::getTracker($guest_uid, $visitor_uid, $visitor_info)) return $tracker->eventUpdateCart($items);
+    else return false;
   }
 
   private function getItemsByProperty($property, $id = false, $arFields = true) {
@@ -399,7 +399,7 @@ class cConveadTracker {
   }
 
   private static function getDomain() {
-    return $_SERVER['HTTP_HOST'];
+    return $_SERVER['SERVER_NAME'];
   }
 
   private static function getDelautPageUrl($page) {
