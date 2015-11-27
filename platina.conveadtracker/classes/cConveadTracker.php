@@ -377,7 +377,7 @@ class cConveadTracker {
   private static function getCurlUri() {
     global $APPLICATION;
     $url = $APPLICATION->GetCurUri();
-    if (self::endsWith($url, "ajax.php?UPDATE_STATE") or self::startsWith($url, "/bitrix/admin/") or self::startsWith($url, "/admin/") or self::contains($url, "/bitrix/tools") or self::contains($url, "bitrix/tools/autosave.php?bxsender=core_autosave")) return false;
+    if (self::endsWith($url, "ajax.php?UPDATE_STATE") or self::startsWith($url, "/bitrix/admin/") or self::startsWith($url, "/ajax/") or self::startsWith($url, "/admin/") or self::contains($url, "/bitrix/tools") or self::contains($url, "bitrix/tools/autosave.php?bxsender=core_autosave")) return false;
     else return $url;
   }
 
