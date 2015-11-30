@@ -87,7 +87,7 @@ class cConveadTracker {
   }
 
   static function newEventUpdateCart($basket) {
-    if (COption::GetOptionString("sale", "expiration_processing_events") == 'N' and !$basket->getOrderId())
+    if (COption::GetOptionString("sale", "expiration_processing_events") == 'N')
     {
       $items = self::getItemsByProperty(array(
           "FUSER_ID" => $basket->getFUserId(),
@@ -120,7 +120,7 @@ class cConveadTracker {
   }
 
   static function updateCart($id, $arFields = false) {
-    if (COption::GetOptionString("sale", "expiration_processing_events") == 'N' or !self::getCurlUri()) return;
+    if (COption::GetOptionString("sale", "expiration_processing_events") == 'N') return;
 
     if (!CModule::includeModule('catalog') || !class_exists("CCatalogSku")) return false;
 
