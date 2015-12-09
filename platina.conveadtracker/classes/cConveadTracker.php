@@ -93,7 +93,8 @@ class cConveadTracker {
           "FUSER_ID" => $basket->getFUserId(),
           //"LID" => SITE_ID,
           "ORDER_ID" => "NULL",
-          "DELAY" => "N"
+          "DELAY" => "N",
+          "CAN_BUY" => "Y"
         )
       );
 
@@ -108,7 +109,8 @@ class cConveadTracker {
           "FUSER_ID" => $basketItem->getCollection()->getFUserId(),
           //"LID" => SITE_ID,
           "ORDER_ID" => "NULL",
-          "DELAY" => "N"
+          "DELAY" => "N",
+          "CAN_BUY" => "Y"
         )
       );
 
@@ -134,7 +136,8 @@ class cConveadTracker {
         "FUSER_ID" => $basket["FUSER_ID"],
         //"LID" => SITE_ID,
         "ORDER_ID" => "NULL",
-        "DELAY" => "N"
+        "DELAY" => "N",
+        "CAN_BUY" => "Y"
       ), $id, $arFields
     );
 
@@ -165,12 +168,14 @@ class cConveadTracker {
         if (!$tracker = self::getTracker($guest_uid, $visitor_uid, $visitor_info)) return true;
 
         $items = self::getItemsByProperty(array(
-           "ORDER_ID" => $arOrder["ID"]
+           "ORDER_ID" => $arOrder["ID"],
+           "CAN_BUY" => "Y"
           )
         );
 
         if (!empty($items))
         {
+          unset($_SESSION['cnv_old_cart']);
           $price = $arOrder["PRICE"] - (isset($arOrder["PRICE_DELIVERY"]) ? $arOrder["PRICE_DELIVERY"] : 0);
           $result = $tracker->eventOrder($ID, $price, $items);
         }
