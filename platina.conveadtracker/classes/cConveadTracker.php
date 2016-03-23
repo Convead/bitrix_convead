@@ -150,35 +150,30 @@ class cConveadTracker {
     $arOrder = CSaleOrder::GetByID(intval($ID));
     if ($arOrder["ID"] > 0)
     {
-      $TimeUpdate = strtotime($arOrder["DATE_UPDATE"]);
-      $TimeAdd = strtotime($arOrder["DATE_INSERT"]);
-      if ($TimeUpdate - $TimeAdd <= 60)
+      $visitor_uid = false;
+      $visitor_info = false;
+      if ($arOrder["USER_ID"] && $arOrder["USER_ID"] &&
+         $visitor_info = self::getVisitorInfo($arOrder["USER_ID"])
+      ) $visitor_uid = $arOrder["USER_ID"];
+
+      $guest_uid = self::getUid($visitor_uid);
+      $phone_name = self::getPhoneCode();
+
+      if ($phone_name && isset($_POST[$phone_name])) $visitor_info["phone"] = $_POST[$phone_name];
+
+      if (!$tracker = self::getTracker($guest_uid, $visitor_uid, $visitor_info)) return true;
+
+      $items = self::getItemsByProperty(array(
+         "ORDER_ID" => $arOrder["ID"],
+         "CAN_BUY" => "Y"
+        )
+      );
+
+      if (!empty($items))
       {
-        $visitor_uid = false;
-        $visitor_info = false;
-        if ($arOrder["USER_ID"] && $arOrder["USER_ID"] &&
-           $visitor_info = self::getVisitorInfo($arOrder["USER_ID"])
-        ) $visitor_uid = $arOrder["USER_ID"];
-
-        $guest_uid = self::getUid($visitor_uid);
-        $phone_name = self::getPhoneCode();
-
-        if ($phone_name && isset($_POST[$phone_name])) $visitor_info["phone"] = $_POST[$phone_name];
-
-        if (!$tracker = self::getTracker($guest_uid, $visitor_uid, $visitor_info)) return true;
-
-        $items = self::getItemsByProperty(array(
-           "ORDER_ID" => $arOrder["ID"],
-           "CAN_BUY" => "Y"
-          )
-        );
-
-        if (!empty($items))
-        {
-          unset($_SESSION['cnv_old_cart']);
-          $price = $arOrder["PRICE"] - (isset($arOrder["PRICE_DELIVERY"]) ? $arOrder["PRICE_DELIVERY"] : 0);
-          $result = $tracker->eventOrder($ID, $price, $items);
-        }
+        unset($_SESSION['cnv_old_cart']);
+        $price = $arOrder["PRICE"] - (isset($arOrder["PRICE_DELIVERY"]) ? $arOrder["PRICE_DELIVERY"] : 0);
+        $result = $tracker->eventOrder($ID, $price, $items);
       }
     }
     return true;
