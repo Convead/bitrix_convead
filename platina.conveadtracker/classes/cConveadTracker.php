@@ -395,7 +395,9 @@ class cConveadTracker {
 
   private static function getTracker($guest_uid = false, $visitor_uid = false, $visitor_info = false) {
     if (!($api_key = self::getApiKey())) return false;
-    return new ConveadTracker($api_key, self::getDomain(), $guest_uid, $visitor_uid, $visitor_info, false, self::getDomain());
+    $convead = new ConveadTracker($api_key, self::getDomain(), $guest_uid, $visitor_uid, $visitor_info, false, self::getDomain());
+    $convead->charset = SITE_CHARSET;
+    return $convead;
   }
 
   private static function getDomain() {
