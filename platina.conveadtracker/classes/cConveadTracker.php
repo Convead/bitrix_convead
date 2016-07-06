@@ -87,23 +87,23 @@ class cConveadTracker {
   }
 
   static function newEventUpdateCart($basket) {
-    if (COption::GetOptionString("sale", "expiration_processing_events") == 'N')
-    {
-      $items = self::getItemsByProperty(array(
+    if (COption::GetOptionString("sale", "expiration_processing_events") == 'Y') return true;
+
+    $items = self::getItemsByProperty(array(
           "FUSER_ID" => $basket->getFUserId(),
           //"LID" => SITE_ID,
           "ORDER_ID" => "NULL",
           "DELAY" => "N",
           "CAN_BUY" => "Y"
         )
-      );
+    );
 
-      return self::sendUpdateCart($items);
-    }
+    return self::sendUpdateCart($items);
   }
 
-  static function newEventSetQtyCart($basketItem, $field, $value)
-  {
+  static function newEventSetQtyCart($basketItem, $field, $value) {
+    if (COption::GetOptionString("sale", "expiration_processing_events") == 'Y') return true;
+
     if ($field == 'QUANTITY' and isset($_REQUEST['action']) and $_REQUEST['action'] == 'recalculate') {
       $items = self::getItemsByProperty(array(
           "FUSER_ID" => $basketItem->getCollection()->getFUserId(),
@@ -120,6 +120,13 @@ class cConveadTracker {
       return self::sendUpdateCart($items);
     }
   }
+  
+  static function newEventOrder($order) {
+    if (COption::GetOptionString("sale", "expiration_processing_events") == 'Y') return true;
+    
+    return self::order( $order->getField("ID") );
+  }
+  
 
   static function updateCart($id, $arFields = false) {
     if (COption::GetOptionString("sale", "expiration_processing_events") == 'N') return;
