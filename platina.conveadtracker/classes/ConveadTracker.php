@@ -343,8 +343,8 @@ class ConveadBrowser {
 
         $curl = curl_init($url);
 
-        curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
+        curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
         curl_setopt($curl, CURLOPT_FAILONERROR, true);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
