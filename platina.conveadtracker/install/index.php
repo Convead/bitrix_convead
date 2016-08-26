@@ -28,13 +28,14 @@ class platina_conveadtracker extends CModule {
         RegisterModule($this->MODULE_ID);
         RegisterModuleDependences("sale", "OnBasketAdd", $this->MODULE_ID, "cConveadTracker", "updateCart", "100");
         RegisterModuleDependences("sale", "OnBeforeBasketDelete", $this->MODULE_ID, "cConveadTracker", "updateCart", "100");
-        RegisterModuleDependences("sale", "OnOrderSave", $this->MODULE_ID, "cConveadTracker", "order", "100");
+        RegisterModuleDependences("sale", "OnSaleComponentOrderComplete", $this->MODULE_ID, "cConveadTracker", "order", "100");
         RegisterModuleDependences("main", "OnAfterEpilog", $this->MODULE_ID, "cConveadTracker", "view", "100");
         RegisterModuleDependences("main", "OnEpilog", $this->MODULE_ID, "cConveadTracker", "head", "100");
         RegisterModuleDependences("sale", "OnBasketUpdate", $this->MODULE_ID, "cConveadTracker", "updateCart", "100");
         RegisterModuleDependences("sale", "OnBeforeViewedAdd", $this->MODULE_ID, "cConveadTracker", "productView", "100");
+        RegisterModuleDependences("sale", "OnSaleStatusOrder", $this->MODULE_ID, "cConveadTracker", "orderSetState", "100");
         
-        RegisterModuleDependences("sale", "OnSaleBasketSaved", $this->MODULE_ID, "cConveadTracker", "newEventUpdateCart", "100"); 
+        RegisterModuleDependences("sale", "OnSaleBasketSaved", $this->MODULE_ID, "cConveadTracker", "newEventUpdateCart", "100");
         RegisterModuleDependences("sale", "OnSaleBasketItemSetField", $this->MODULE_ID, "cConveadTracker", "newEventSetQtyCart", "100");
         RegisterModuleDependences("sale", "OnSaleOrderSaved", $this->MODULE_ID, "cConveadTracker", "newEventOrder", "100");
     
@@ -45,11 +46,12 @@ class platina_conveadtracker extends CModule {
     public function DoUninstall() {
         UnRegisterModuleDependences("sale", "OnBasketAdd", $this->MODULE_ID, "cConveadTracker", "updateCart");
         UnRegisterModuleDependences("sale", "OnBeforeBasketDelete", $this->MODULE_ID, "cConveadTracker", "updateCart");
-        UnRegisterModuleDependences("sale", "OnOrderSave", $this->MODULE_ID, "cConveadTracker", "order");
+        UnRegisterModuleDependences("sale", "OnSaleComponentOrderComplete", $this->MODULE_ID, "cConveadTracker", "order");
         UnRegisterModuleDependences("main", "OnAfterEpilog", $this->MODULE_ID, "cConveadTracker", "view");
         UnRegisterModuleDependences("main", "OnEpilog", $this->MODULE_ID, "cConveadTracker", "head");
         UnRegisterModuleDependences("sale", "OnBasketUpdate", $this->MODULE_ID, "cConveadTracker", "updateCart");
         UnRegisterModuleDependences("main", "OnBeforeViewedAdd", $this->MODULE_ID, "cConveadTracker", "productView");
+        UnRegisterModuleDependences("main", "OnSaleStatusOrder", $this->MODULE_ID, "cConveadTracker", "orderSetState");
         
         UnRegisterModuleDependences("sale", "OnSaleBasketSaved", $this->MODULE_ID, "cConveadTracker", "newEventUpdateCart"); 
         UnRegisterModuleDependences("sale", "OnSaleBasketItemSetField", $this->MODULE_ID, "cConveadTracker", "newEventSetQtyCart");
