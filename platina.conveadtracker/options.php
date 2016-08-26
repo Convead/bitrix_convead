@@ -32,6 +32,17 @@ if ($APPLICATION->GetGroupRight(ADMIN_MODULE_NAME) >= 'R') {
 		} else {
 
 			$is_saved = false;
+			$access_token_name = 'access_token_code';
+
+			if (isset($_REQUEST[$access_token_name])) {
+				COption::SetOptionString(
+					ADMIN_MODULE_NAME,
+					$access_token_name,
+					$_REQUEST[$access_token_name],
+					Loc::getMessage("PHONE_CODE")
+				);
+				$is_saved = true;
+			}
 
 			$rsSites = CSite::GetList($by="sort", $order="desc");
 			while ($arSite = $rsSites->Fetch()) {
@@ -82,9 +93,8 @@ if ($APPLICATION->GetGroupRight(ADMIN_MODULE_NAME) >= 'R') {
 			</div>
 		<?php endif; ?>
 
-		<? $tabControl->BeginNextTab(); ?>
-
 		<?php
+		$tabControl->BeginNextTab();
 
 		$single_tracker_code = COption::GetOptionString(ADMIN_MODULE_NAME, "tracker_code", '');
 		$single_phone_code = COption::GetOptionString(ADMIN_MODULE_NAME, "phone_code", '');
@@ -101,7 +111,6 @@ if ($APPLICATION->GetGroupRight(ADMIN_MODULE_NAME) >= 'R') {
 			<tr class="heading">
 				<td colspan="2"><b><?=$arSite['NAME']?></b></td>
 			</tr>
-
 
 			<tr>
 				<td width="40%">
