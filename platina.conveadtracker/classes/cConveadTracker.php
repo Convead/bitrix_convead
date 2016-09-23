@@ -33,6 +33,8 @@ class cConveadTracker {
 
     if (self::contains($_SERVER['HTTP_USER_AGENT'], 'facebook.com')) return;
 
+    if (!CModule::includeModule('catalog')) return;
+
     global $APPLICATION;
     global $USER;
 
@@ -311,6 +313,8 @@ class cConveadTracker {
       return true;
 
     if (self::contains($_SERVER['HTTP_USER_AGENT'], 'facebook.com')) return;
+
+    if (!CModule::includeModule('catalog')) return;
 
     global $APPLICATION;
     global $USER;
