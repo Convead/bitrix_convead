@@ -2,8 +2,10 @@
 CModule::IncludeModule("platina.conveadtracker");
 
 $arClasses=array(
-    'cConveadTracker'=>'classes/cConveadTracker.php',
-    'ConveadTracker'=>'classes/ConveadTracker.php',
+  'ConveadTracker'=>'classes/ConveadTracker.php',
+  'ConveadApi'=>'classes/ConveadTracker.php',
+  'ConveadBrowser'=>'classes/ConveadTracker.php',
+  'cConveadTracker'=>'classes/cConveadTracker.php',
 );
 
 CModule::AddAutoloadClasses("platina.conveadtracker",$arClasses);
