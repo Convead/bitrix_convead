@@ -124,8 +124,11 @@ class cConveadTracker {
   
   static function newEventOrder($order) {
     $order_id = intval($order->getField('ID'));
-    if (COption::GetOptionString('sale', 'expiration_processing_events') == 'Y') return true;
-    else return self::order( $order_id );
+    $isNew = $order->isNew();
+
+    if (!$isNew) return;
+    
+    return self::order( $order_id );
   }
 
   static function updateCart($id, $arFields = false) {
