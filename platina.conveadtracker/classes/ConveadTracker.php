@@ -147,8 +147,7 @@ class ConveadTracker {
         $properties = array();
         $properties["order_id"] = (string) $order_id;
 
-        if ($revenue == false) return false;
-        else $properties["revenue"] = $revenue;
+        if ($revenue !== false) $properties["revenue"] = $revenue;
 
         if (is_array($order_array)) $properties["items"] = $order_array;
 
@@ -288,13 +287,13 @@ class ConveadApi {
         $this->api_key = (string) $api_key;
     }
 
-    public function order_delete($order_id) {
+    public function orderDelete($order_id) {
         $this->browser->method = 'DELETE';
         $url = "{$this->api_page}api/v1/accounts/{$this->api_key}/orders/{$order_id}";
         return $this->browser->get($url);
     }
 
-    public function order_set_state($order_id, $state) {
+    public function orderSetState($order_id, $state) {
         $url = "{$this->api_page}api/v1/accounts/{$this->api_key}/orders/{$order_id}";
         $post = array(
             'state' => $state
@@ -311,7 +310,7 @@ class ConveadApi {
 class ConveadBrowser {
     public $version = '1.1.4';
 
-    public $debug = false;
+    public $debug = true;
 
     public $timeout = 1;
     public $connect_timeout = 1;
@@ -321,22 +320,8 @@ class ConveadBrowser {
     public function __initialize() {
     }
 
-    public function isUAAbandoned($user_agent){
-        if(!$user_agent) return true;
-
-        $re = "/bot|crawl(er|ing)|google|yandex|rambler|yahoo|bingpreview|alexa|facebookexternalhit|bitrix/i"; 
-        
-        $matches = array(); 
-        preg_match($re, $user_agent, $matches);
-
-        return (count($matches) > 0);
-    }
-
     public function get($url, $post = false) {
         $this->put_log($url, $post);
-
-        if ($this->isUAAbandoned($_SERVER['HTTP_USER_AGENT']))
-            return true;
 
         if (isset($_COOKIE['convead_track_disable']))
             return 'Convead tracking disabled';

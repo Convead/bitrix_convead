@@ -121,15 +121,6 @@ class cConveadTracker {
       return self::sendUpdateCart($items);
     }
   }
-  
-  static function newEventOrder($order) {
-    $order_id = intval($order->getField('ID'));
-    $isNew = $order->isNew();
-
-    if (!$isNew) return;
-    
-    return self::order( $order_id );
-  }
 
   static function updateCart($id, $arFields = false) {
     if (COption::GetOptionString('sale', 'expiration_processing_events') == 'N') return;
@@ -153,26 +144,34 @@ class cConveadTracker {
 
     return self::sendUpdateCart($items);
   }
+  
+  static function newEventOrder($order) {
+    $order_id = intval($order->getField('ID'));
+    $is_new = $order->isNew();
+    $order = CSaleOrder::GetByID($order_id);
+    $state = $order['STATUS_ID'];
+    $site_id = $order['LID'];
+    
+    if ($is_new) return self::order($order_id);
+    
+    if ($order['CANCELED'] == 'Y') return self::orderDelete($site_id, $order_id);
+    
+    return self::orderSetState($site_id, $order_id, $state);
+  }
 
   static function order($ID, $fuserID, $strLang, $arDiscounts) {
     $order_id = intval($ID);
-    $order = CSaleOrder::GetByID($order_id);
-    $state = $order['STATUS_ID'];
-    if ($order['CANCELED'] == 'Y') self::orderDelete($order_id);
-    else {
-      if ($state == 'N') self::purchase($order_id);
-      else self::orderSetState($order_id, $state);
-    }
+    self::purchase($order_id);
   }
 
-  static function orderDelete($order_id) {
-    if (!($api = self::getApi())) return true;
-    return $api->order_delete($order_id);
+  static function orderDelete($site_id, $order_id) {
+    if (!($api = self::getApi($site_id))) return;
+    return $api->orderDelete($order_id);
   }
 
-  static function orderSetState($order_id, $state) {
-    if (!($api = self::getApi())) return true;
-    return $api->order_set_state($order_id, $state);
+  static function orderSetState($site_id, $order_id, $state) {
+    if (!($api = self::getApi($site_id))) return;
+    return $api->orderSetState($order_id, $state);
   }
 
   static function purchase($order_id) {
@@ -395,8 +394,9 @@ class cConveadTracker {
     else return false;
   }
 
-  private static function getApiKey() {
-    if ($api_key = COption::GetOptionString(self::$MODULE_ID, 'tracker_code_'.SITE_ID, '')) return $api_key;
+  private static function getApiKey($site_id = false) {
+    if ($site_id === false) $site_id = SITE_ID;
+    if ($api_key = COption::GetOptionString(self::$MODULE_ID, 'tracker_code_'.$site_id, '')) return $api_key;
     elseif ($single_api_key = COption::GetOptionString(self::$MODULE_ID, 'tracker_code', '')) return $single_api_key;
     else return false;
   }
@@ -408,9 +408,9 @@ class cConveadTracker {
     return $tracker;
   }
 
-  private static function getApi()
+  private static function getApi($site_id)
   {
-    if (!($api_key = self::getApiKey())) return false;
+    if (!($api_key = self::getApiKey($site_id))) return false;
     $api = new ConveadApi($api_key);
     return $api;
   }
