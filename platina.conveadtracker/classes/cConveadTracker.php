@@ -45,7 +45,7 @@ class cConveadTracker {
     if ($user_id && $visitor_info = self::getVisitorInfo($user_id)) $visitor_uid = (int)$user_id;
 
     $guest_uid = self::getUid($visitor_uid);
-    if (!$tracker = self::getTracker($guest_uid, $visitor_uid, $visitor_info)) return true;
+    if (!$tracker = self::getTracker(false, $guest_uid, $visitor_uid, $visitor_info)) return true;
 
     $arProduct = CCatalogProduct::GetByIDEx($arResult['PRODUCT_ID']);
     if ($arProduct && strpos($APPLICATION->GetCurPage(), $arProduct['DETAIL_PAGE_URL']) !== false)
@@ -175,8 +175,6 @@ class cConveadTracker {
   }
 
   static function purchase($order_id) {
-    if (!self::getCurlUri()) return true;
-
     $order = CSaleOrder::GetByID(intval($order_id));
 
     if ($order['ID'] > 0)
@@ -185,14 +183,15 @@ class cConveadTracker {
       $visitor_info = false;
       if ($order['USER_ID'] && $order['USER_ID'] &&
          $visitor_info = self::getVisitorInfo($order['USER_ID'])
-      ) $visitor_uid = $order['USER_ID'];
-
+      )
+      
+      $visitor_uid = $order['USER_ID'];
       $guest_uid = self::getUid($visitor_uid);
       $phone_name = self::getPhoneCode();
 
-      if ($phone_name && isset($_POST[$phone_name])) $visitor_info['phone'] = $_POST[$phone_name];
+      if ($phone_name && !empty($_POST[$phone_name])) $visitor_info['phone'] = $_POST[$phone_name];
 
-      if (!$tracker = self::getTracker($guest_uid, $visitor_uid, $visitor_info)) return true;
+      if (!$tracker = self::getTracker($order['LID'], $guest_uid, $visitor_uid, $visitor_info)) return true;
 
       $items = self::getItemsByProperty(array(
          'ORDER_ID' => $order['ID'],
@@ -204,6 +203,8 @@ class cConveadTracker {
       {
         unset($_SESSION['cnv_old_cart']);
         $price = $order['PRICE'] - (isset($order['PRICE_DELIVERY']) ? $order['PRICE_DELIVERY'] : 0);
+        
+        
         $result = $tracker->eventOrder($ID, $price, $items);
       }
     }
@@ -224,7 +225,7 @@ class cConveadTracker {
     $title = $APPLICATION->GetTitle();
     if ($url = self::getCurlUri()) return true;
 
-    if (!$tracker = self::getTracker($guest_uid, $visitor_uid, $visitor_info)) return true;
+    if (!$tracker = self::getTracker(false, $guest_uid, $visitor_uid, $visitor_info)) return true;
 
     $result = $tracker->view($url, $title);
 
@@ -328,7 +329,7 @@ class cConveadTracker {
       $visitor_uid = (int) $user_id;
     }
     $guest_uid = self::getUid($visitor_uid);
-    if (!$tracker = self::getTracker($guest_uid, $visitor_uid, $visitor_info)) return true;
+    if (!$tracker = self::getTracker(false, $guest_uid, $visitor_uid, $visitor_info)) return true;
 
     $arProduct = CCatalogProduct::GetByIDEx($arResult['PRODUCT_ID']);
 
@@ -357,7 +358,7 @@ class cConveadTracker {
     if (isset($_SESSION['cnv_old_cart']) and $_SESSION['cnv_old_cart'] == $items) return true;
     $_SESSION['cnv_old_cart'] = $items;
 
-    if ($tracker = self::getTracker($guest_uid, $visitor_uid, $visitor_info)) return $tracker->eventUpdateCart($items);
+    if ($tracker = self::getTracker(false, $guest_uid, $visitor_uid, $visitor_info)) return $tracker->eventUpdateCart($items);
     else return false;
   }
 
@@ -378,7 +379,8 @@ class cConveadTracker {
 
   private static function getUid($visitor_uid) {
     if ($visitor_uid) return false;
-    else return $_COOKIE['convead_guest_uid'];
+    if (!empty($_COOKIE['convead_guest_uid'])) return $_COOKIE['convead_guest_uid'];
+    return false;
   }
 
   private static function getCurlUri() {
@@ -401,8 +403,8 @@ class cConveadTracker {
     else return false;
   }
 
-  private static function getTracker($guest_uid = false, $visitor_uid = false, $visitor_info = false) {
-    if (!($api_key = self::getApiKey())) return false;
+  private static function getTracker($site_id = false, $guest_uid = false, $visitor_uid = false, $visitor_info = false) {
+    if (!($api_key = self::getApiKey($site_id))) return false;
     $tracker = new ConveadTracker($api_key, self::getDomain(), $guest_uid, $visitor_uid, $visitor_info, false, self::getDomain());
     $tracker->charset = SITE_CHARSET;
     return $tracker;
