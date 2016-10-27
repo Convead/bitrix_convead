@@ -164,14 +164,25 @@ class cConveadTracker {
     self::purchase($order_id);
   }
 
-  static function orderDelete($site_id, $order_id) {
-    if (!($api = self::getApi($site_id))) return;
-    return $api->orderDelete($order_id);
-  }
-
   static function orderSetState($site_id, $order_id, $state) {
     if (!($api = self::getApi($site_id))) return;
-    return $api->orderSetState($order_id, $state);
+  switch ($state) {
+      case 'N':
+        $state = 'new';
+        break;
+      case 'P':
+        $state = 'paid';
+        break;
+      case 'F':
+        $state = 'shipped';
+        break;
+    }
+    return $api->orderUpdate($order_id, $state);
+  }
+
+  static function orderDelete($site_id, $order_id) {
+    if (!($api = self::getApi($site_id))) return;
+    return $api->orderUpdate($order_id, 'cancelled');
   }
 
   static function purchase($order_id) {
@@ -233,7 +244,7 @@ class cConveadTracker {
   }
 
   static function HeadScript($api_key) {
-    if (!($api_key = self::getApiKey())) return;
+    if (!($api_key = self::getAppKey())) return;
 
     global $USER;
     global $APPLICATION;
@@ -274,7 +285,7 @@ class cConveadTracker {
   static function head() {
     if (!self::getCurlUri()) return true;
 
-    if (!($api_key = self::getApiKey())) return false;
+    if (!($api_key = self::getAppKey())) return false;
 
     global $APPLICATION, $USER;
 
@@ -396,7 +407,12 @@ class cConveadTracker {
     else return false;
   }
 
-  private static function getApiKey($site_id = false) {
+  private static function getToken() {
+    $token = COption::GetOptionString(self::$MODULE_ID, 'access_token_code', '');
+    return $token;
+  }
+
+  private static function getAppKey($site_id = false) {
     if ($site_id === false) $site_id = SITE_ID;
     if ($api_key = COption::GetOptionString(self::$MODULE_ID, 'tracker_code_'.$site_id, '')) return $api_key;
     elseif ($single_api_key = COption::GetOptionString(self::$MODULE_ID, 'tracker_code', '')) return $single_api_key;
@@ -404,7 +420,7 @@ class cConveadTracker {
   }
 
   private static function getTracker($site_id = false, $guest_uid = false, $visitor_uid = false, $visitor_info = false) {
-    if (!($api_key = self::getApiKey($site_id))) return false;
+    if (!($api_key = self::getAppKey($site_id))) return false;
     $tracker = new ConveadTracker($api_key, self::getDomain(), $guest_uid, $visitor_uid, $visitor_info, false, self::getDomain());
     $tracker->charset = SITE_CHARSET;
     return $tracker;
@@ -412,8 +428,8 @@ class cConveadTracker {
 
   private static function getApi($site_id)
   {
-    if (!($api_key = self::getApiKey($site_id))) return false;
-    $api = new ConveadApi($api_key);
+    if (!($api_key = self::getAppKey($site_id)) || !($access_token = self::getToken())) return false;
+    $api = new ConveadApi($access_token, $api_key);
     return $api;
   }
 
