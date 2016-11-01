@@ -242,19 +242,19 @@ class cConveadTracker {
 
   /* --- приватные методы --- */
 
-  static function sendPurchase($order_id) {
+  private static function sendPurchase($order_id) {
     $order_data = self::getOrderData($order_id);
     if (!$order_data) return false;
     $visitor_info = $order_data->uid ? self::getVisitorInfo($order_data->uid) : array();
-    if ($phone_name = self::getPhoneCode() && !empty($_POST[$phone_name])) $visitor_info['phone'] = $_POST[$phone_name];
-    if (!$tracker = self::getTracker($order_data->lid, self::getUid($visitor_uid), $order_data->uid, $visitor_info)) return true;
+    if ($phone_name = self::getPhoneCode() and !empty($_POST[$phone_name])) $visitor_info['phone'] = $_POST[$phone_name];
+    if (!$tracker = self::getTracker($order_data->lid, self::getUid($order_data->uid), $order_data->uid, $visitor_info)) return true;
     if (empty($order_data->items)) return false;
     unset($_SESSION['cnv_old_cart']);
     return $tracker->eventOrder($order_data->order_id, $order_data->revenue, $order_data->items);
   }
 
   /* получение информации о зарегистрированном пользователе */
-  private function getVisitorInfo($id) {
+  private static function getVisitorInfo($id) {
     if ($usr = CUser::GetByID($id)) {
       $user = $usr->Fetch();
 
@@ -277,7 +277,7 @@ class cConveadTracker {
   }
 
   /* вставка widget.js */
-  private function getHeadScript($api_key) {
+  private static function getHeadScript($api_key) {
     if (!($api_key = self::getAppKey())) return;
 
     global $USER;
@@ -317,7 +317,7 @@ class cConveadTracker {
   }
 
   /* получение объекта заказа */
-  private function getOrderData($order_id) {
+  private static function getOrderData($order_id) {
     $order = CSaleOrder::GetByID(intval($order_id));
     if (!$order['ID']) return false;
     $items = self::getItemsByProperty(array(
@@ -337,7 +337,7 @@ class cConveadTracker {
   }
 
   /* замена статусов на предустановленные */
-  private function switchState($state) {
+  private static function switchState($state) {
     switch ($state) {
       case 'N':
         $state = 'new';
@@ -352,7 +352,7 @@ class cConveadTracker {
     return $state;
   }
 
-  private function sendUpdateCart($items = array()) {
+  private static function sendUpdateCart($items = array()) {
     global $USER;
     $user_id = false;
     if($USER->GetID()) $user_id = $USER->GetID();
@@ -372,7 +372,7 @@ class cConveadTracker {
     else return false;
   }
 
-  private function getItemsByProperty($property, $id = false, $arFields = true) {
+  private static function getItemsByProperty($property, $id = false, $arFields = true) {
     $items = array();
     $orders = CSaleBasket::GetList(array(), $property, false, false, array());
     while ($order = $orders->Fetch()) {
@@ -388,9 +388,7 @@ class cConveadTracker {
   }
 
   private static function getUid($visitor_uid) {
-    if ($visitor_uid) return false;
-    if (!empty($_COOKIE['convead_guest_uid'])) return $_COOKIE['convead_guest_uid'];
-    return false;
+    return (!$visitor_uid and !empty($_COOKIE['convead_guest_uid'])) ? $_COOKIE['convead_guest_uid'] : false;
   }
 
   private static function getCurlUri() {
