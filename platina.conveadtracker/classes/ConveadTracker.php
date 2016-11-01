@@ -284,7 +284,7 @@ class ConveadTracker {
   }
 
   private function send($url, $post = false, $method = 'POST') {
-    $this->put_log($url, $post);
+    $this->put_log($url, $method, $post);
 
     if (isset($_COOKIE['convead_track_disable']))
       return 'Convead tracking disabled';
@@ -329,14 +329,15 @@ class ConveadTracker {
     return implode('&', $query_array);
   }
 
-  private function put_log($url, $post) {
+  private function put_log($url, $method, $post) {
     if (!$this->debug) return true;
 
     ob_start();
     print_r($post);
     $string = ob_get_clean();
-
-    $row = "{date('Y.m.d H:i:s')}\n{$this->method} {$url}\n{$string}\n\n";
+    
+    $date = date('Y.m.d H:i:s');
+    $row = "{$date}\n{$method} {$url}\n{$string}\n\n";
     $filename = dirname(__FILE__) . "/tracker_debug.log";
     return file_put_contents($filename, $row, FILE_APPEND);
   }

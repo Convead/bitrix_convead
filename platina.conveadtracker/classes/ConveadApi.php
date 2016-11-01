@@ -160,7 +160,8 @@ class ConveadApi {
     print_r($post);
     $string = ob_get_clean();
 
-    $row = "{date('Y.m.d H:i:s')}\n{$method} {$url}\n{$string}\n\n";
+    $date = date('Y.m.d H:i:s');
+    $row = "{$date}\n{$method} {$url}\n{$string}\n\n";
     $filename = dirname(__FILE__) . "/api_debug.log";
     return file_put_contents($filename, $row, FILE_APPEND);
   }

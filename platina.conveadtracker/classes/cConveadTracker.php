@@ -119,15 +119,20 @@ class cConveadTracker {
   static function newEventOrder($order) {
     $is_new = $order->isNew();
     $order_data = self::getOrderData($order->getField('ID'));
+    if (!$order_data) return true;
     if ($is_new) return self::sendPurchase($order_data->order_id);
     if ($order_data->cancelled == 'Y') return self::orderDelete($order_data->lid, $order_data->order_id);
     if (!($api = self::getApi($order_data->lid))) return true;
     return $api->orderUpdate($order_data->order_id, $order_data->state, $order_data->revenue, $order_data->items);
   }
 
-  /* колбек покупки для старых версий */
-  static function order($order_id, $fuserID, $strLang, $arDiscounts) {
-    return self::sendPurchase($order_id);
+  /* колбек покупки и изменения заказа для старых версий */
+  static function order($order_id, $fuserID, $order, $is_new = false) {
+    $order_data = self::getOrderData($order_id);
+    if (!$order_data) return true;
+    if ($is_new) return self::sendPurchase($order_data->order_id);
+    if (!($api = self::getApi($order_data->lid))) return true;
+    return $api->orderUpdate($order_data->order_id, $order_data->state, $order_data->revenue, $order_data->items);
   }
 
   /* колбек изменения статуса заказа */
