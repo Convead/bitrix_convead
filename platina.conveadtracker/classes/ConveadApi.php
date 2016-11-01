@@ -61,7 +61,7 @@ class ConveadApi {
 
     if ($revenue !== null) $post['revenue'] = $revenue;
     if ($items !== null) $post['items'] = $items;
-    if ($state !== null) $post['revenue'] = $state;
+    if ($state !== null) $post['state'] = $state;
     if ($visitor !== null) $post['visitor'] = $visitor;
 
     return $this->send($url, 'PUT', $post);
