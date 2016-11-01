@@ -240,7 +240,7 @@ class ConveadTracker {
    * 
    * @param string $path
    */
-  private function getUrl($path) {
+  private function getUrl() {
     return "{$this->protocol}://{$this->host}/watch/event";
   }
 

@@ -325,7 +325,7 @@ class cConveadTracker {
         'CAN_BUY' => 'Y'
       )
     );
-    $ret = new STDclass();
+    $ret = new stdClass();
     $ret->order_id = $order['ID'];
     $ret->revenue = $order['PRICE'] - (isset($order['PRICE_DELIVERY']) ? $order['PRICE_DELIVERY'] : 0);
     $ret->items = $items;
@@ -364,7 +364,7 @@ class cConveadTracker {
 
     $guest_uid = self::getUid($visitor_uid);
 
-    # fix double events
+    // исключить повторный вызов события
     if (isset($_SESSION['cnv_old_cart']) and $_SESSION['cnv_old_cart'] == $items) return true;
     $_SESSION['cnv_old_cart'] = $items;
 
@@ -376,7 +376,7 @@ class cConveadTracker {
     $items = array();
     $orders = CSaleBasket::GetList(array(), $property, false, false, array());
     while ($order = $orders->Fetch()) {
-      if (!$arFields) {//deleting
+      if (!$arFields) { // удаленный
         if ($order['ID'] == $id) continue;
       }
       $item['product_id'] = $order['PRODUCT_ID'];
