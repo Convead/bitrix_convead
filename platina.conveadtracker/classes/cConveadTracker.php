@@ -250,7 +250,7 @@ class cConveadTracker {
     if (!$tracker = self::getTracker($order_data->lid, self::getUid($order_data->uid), $order_data->uid, $visitor_info)) return true;
     if (empty($order_data->items)) return false;
     unset($_SESSION['cnv_old_cart']);
-    return $tracker->eventOrder($order_data->order_id, $order_data->revenue, $order_data->items);
+    return $tracker->eventOrder($order_data->order_id, $order_data->revenue, $order_data->items, $order_data->state);
   }
 
   /* получение информации о зарегистрированном пользователе */
