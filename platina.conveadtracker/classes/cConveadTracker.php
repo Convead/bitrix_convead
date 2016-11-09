@@ -122,8 +122,8 @@ class cConveadTracker {
     if (!$order_data) return true;
     if ($is_new) return self::sendPurchase($order_data->order_id);
     if ($order_data->cancelled == 'Y') return self::orderDelete($order_data->lid, $order_data->order_id);
-    if (!($api = self::getApi($order_data->lid))) return true;
-    return $api->orderUpdate($order_data->order_id, $order_data->state, $order_data->revenue, $order_data->items);
+    if (!($tracker = self::getTracker($order_data->lid))) return true;
+    return $tracker->webHookOrderUpdate($order_data->order_id, $order_data->state, $order_data->revenue, $order_data->items);
   }
 
   /* колбек покупки и изменения заказа для старых версий */
@@ -131,21 +131,21 @@ class cConveadTracker {
     $order_data = self::getOrderData($order_id);
     if (!$order_data) return true;
     if ($is_new) return self::sendPurchase($order_data->order_id);
-    if (!($api = self::getApi($order_data->lid))) return true;
-    return $api->orderUpdate($order_data->order_id, $order_data->state, $order_data->revenue, $order_data->items);
+    if (!($tracker = self::getTracker($order_data->lid))) return true;
+    return $tracker->webHookOrderUpdate($order_data->order_id, $order_data->state, $order_data->revenue, $order_data->items);
   }
 
   /* колбек изменения статуса заказа */
   static function orderSetState($site_id, $order_id, $state) {
-    if (!($api = self::getApi($site_id))) return;
+    if (!($tracker = self::getTracker($site_id))) return;
     $state = self::switchState($state);
-    return $api->orderUpdate($order_id, $state);
+    return $tracker->webHookOrderUpdate($order_id, $state);
   }
 
   /* колбек удаления заказа */
   static function orderDelete($site_id, $order_id) {
-    if (!($api = self::getApi($site_id))) return;
-    return $api->orderUpdate($order_id, 'cancelled');
+    if (!($tracker = self::getTracker($site_id))) return;
+    return $tracker->webHookOrderUpdate($order_id, 'cancelled');
   }
 
   /*  колбек события link */
@@ -165,14 +165,14 @@ class cConveadTracker {
 
     if (!$tracker = self::getTracker(false, $guest_uid, $visitor_uid, $visitor_info)) return true;
 
-    return $tracker->view($url, $title);
+    return $tracker->eventLink($url, $title);
   }
 
   /*  колбек для вставки основного кода widget.js */
   static function head() {
     if (!self::getCurlUri()) return true;
 
-    if (!($api_key = self::getAppKey())) return false;
+    if (!($app_key = self::getAppKey())) return false;
 
     global $APPLICATION, $USER;
 
@@ -186,14 +186,14 @@ class cConveadTracker {
       $frame = new \Bitrix\Main\Page\FrameHelper('platina_conveadtracker');
       $frame->begin();
       $actionType = \Bitrix\Main\Context::getCurrent()->getServer()->get('HTTP_BX_ACTION_TYPE');
-      /*if ($actionType == 'get_dynamic') */echo self::getHeadScript($api_key);
+      /*if ($actionType == 'get_dynamic') */echo self::getHeadScript($app_key);
       $frame->beginStub();
       $frame->end();
     }
     else
     {
       global $APPLICATION;
-      $APPLICATION->AddHeadString(self::getHeadScript($api_key), false, true);
+      $APPLICATION->AddHeadString(self::getHeadScript($app_key), false, true);
     }
 
     @session_start();
@@ -277,8 +277,8 @@ class cConveadTracker {
   }
 
   /* вставка widget.js */
-  private static function getHeadScript($api_key) {
-    if (!($api_key = self::getAppKey())) return;
+  private static function getHeadScript($app_key) {
+    if (!$app_key) return;
 
     global $USER;
     global $APPLICATION;
@@ -305,10 +305,10 @@ class cConveadTracker {
   window.ConveadSettings = {
     " . ($visitor_uid ? "visitor_uid: '$visitor_uid'," : '') . "
     " . ($visitor_info ? "visitor_info: ".json_encode($visitor_info)."," : '') . "
-    app_key: '$api_key'
+    app_key: '$app_key'
   };
 
-  (function(w,d,c){w[c]=w[c]||function(){(w[c].q=w[c].q||[]).push(arguments)};var ts = (+new Date()/86400000|0)*86400;var s = d.createElement('script');s.type = 'text/javascript';s.async = true;s.charset = 'utf-8';s.src = 'https://tracker.convead.io/widgets/'+ts+'/widget-$api_key.js';var x = d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s, x);})(window,document,'convead');
+  (function(w,d,c){w[c]=w[c]||function(){(w[c].q=w[c].q||[]).push(arguments)};var ts = (+new Date()/86400000|0)*86400;var s = d.createElement('script');s.type = 'text/javascript';s.async = true;s.charset = 'utf-8';s.src = 'https://tracker.convead.io/widgets/'+ts+'/widget-$app_key.js';var x = d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s, x);})(window,document,'convead');
   $js_view_product
 </script>
 <!-- /Convead Widget -->";
@@ -404,30 +404,18 @@ class cConveadTracker {
     else return false;
   }
 
-  private static function getToken() {
-    $token = COption::GetOptionString(self::$MODULE_ID, 'access_token_code', '');
-    return $token;
-  }
-
   private static function getAppKey($site_id = false) {
     if ($site_id === false) $site_id = SITE_ID;
-    if ($api_key = COption::GetOptionString(self::$MODULE_ID, 'tracker_code_'.$site_id, '')) return $api_key;
-    elseif ($single_api_key = COption::GetOptionString(self::$MODULE_ID, 'tracker_code', '')) return $single_api_key;
+    if ($app_key = COption::GetOptionString(self::$MODULE_ID, 'tracker_code_'.$site_id, '')) return $app_key;
+    elseif ($single_app_key = COption::GetOptionString(self::$MODULE_ID, 'tracker_code', '')) return $single_app_key;
     else return false;
   }
 
   private static function getTracker($site_id = false, $guest_uid = false, $visitor_uid = false, $visitor_info = false) {
-    if (!($api_key = self::getAppKey($site_id))) return false;
-    $tracker = new ConveadTracker($api_key, self::getDomain(), $guest_uid, $visitor_uid, $visitor_info, false, self::getDomain());
+    if (!($app_key = self::getAppKey($site_id))) return false;
+    $tracker = new ConveadTracker($app_key, self::getDomain(), $guest_uid, $visitor_uid, $visitor_info, false, self::getDomain());
     $tracker->charset = SITE_CHARSET;
     return $tracker;
-  }
-
-  private static function getApi($site_id)
-  {
-    if (!($api_key = self::getAppKey($site_id)) || !($access_token = self::getToken())) return false;
-    $api = new ConveadApi($access_token, $api_key);
-    return $api;
   }
 
   private static function getDomain() {

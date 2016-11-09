@@ -95,19 +95,6 @@ if ($APPLICATION->GetGroupRight(ADMIN_MODULE_NAME) >= 'R') {
 
 		<?php
 		$tabControl->BeginNextTab();
-		$access_token_name = 'access_token_code';
-		$access_token_code = COption::GetOptionString(ADMIN_MODULE_NAME, "access_token_code", '');
-		?>
-
-		<tr>
-			<td width="40%">
-				<label for="<?=$access_token_name?>"><?= Loc::getMessage("ACCESS_TOKEN") ?>:</label>
-			<td width="60%">
-				<input type="text" size="50" name="<?=$access_token_name?>" value="<?= htmlspecialcharsbx( $access_token_code ) ?>" />
-			</td>
-		</tr>
-
-		<?php
 
 		$single_tracker_code = COption::GetOptionString(ADMIN_MODULE_NAME, "tracker_code", '');
 		$single_phone_code = COption::GetOptionString(ADMIN_MODULE_NAME, "phone_code", '');
