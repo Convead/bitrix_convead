@@ -18,7 +18,7 @@ class cConveadTracker {
     global $USER;
 
     $visitor_uid = false;
-    if (!$user_id) $user_id = $USER->GetID();
+    if (!$user_id and $USER) $user_id = $USER->GetID();
 
     $visitor_info = false;
     if ($user_id && $visitor_info = self::getVisitorInfo($user_id)) $visitor_uid = (int)$user_id;
@@ -157,7 +157,7 @@ class cConveadTracker {
 
     $visitor_info = false;
     $visitor_uid = false;
-    if ($USER->GetID() && $USER->GetID() > 0 && $visitor_info = self::getVisitorInfo($USER->GetID())) $visitor_uid = $USER->GetID();
+    if ($USER and $USER->GetID() and $visitor_info = self::getVisitorInfo($USER->GetID())) $visitor_uid = $USER->GetID();
 
     $guest_uid = self::getUid($visitor_uid);
     $title = $APPLICATION->GetTitle();
@@ -178,7 +178,7 @@ class cConveadTracker {
 
     $visitor_info = false;
     $visitor_uid = false;
-    if ($USER && $USER->GetID() && $USER->GetID() > 0 && $visitor_info = self::getVisitorInfo($USER->GetID())) $visitor_uid = $USER->GetID();
+    if ($USER and $USER->GetID() and $visitor_info = self::getVisitorInfo($USER->GetID())) $visitor_uid = $USER->GetID();
     $guest_uid = self::getUid($visitor_uid);
 
     if (CHTMLPagesCache::IsOn())
@@ -219,7 +219,7 @@ class cConveadTracker {
     global $USER;
 
     $visitor_uid = false;
-    if(!$user_id)
+    if(!$user_id and $USER)
       $user_id = $USER->GetID();
 
     $visitor_info = false;
@@ -288,7 +288,7 @@ class cConveadTracker {
 
     $visitor_info = array();
     $visitor_uid = false;
-    if ($USER && $USER->GetID() && $USER->GetID() > 0 && $visitor_info = self::getVisitorInfo($USER->GetID())) $visitor_uid = $USER->GetID();
+    if ($USER and $USER->GetID() and $visitor_info = self::getVisitorInfo($USER->GetID())) $visitor_uid = $USER->GetID();
 
     $guest_uid = self::getUid($visitor_uid);
 
@@ -355,7 +355,7 @@ class cConveadTracker {
   private static function sendUpdateCart($items = array()) {
     global $USER;
     $user_id = false;
-    if($USER->GetID()) $user_id = $USER->GetID();
+    if($USER and $USER->GetID()) $user_id = $USER->GetID();
 
     $visitor_uid = false;
     $visitor_info = false;
