@@ -364,6 +364,8 @@ class cConveadTracker {
 
     $guest_uid = self::getUid($visitor_uid);
 
+    if (!$guest_uid and !$visitor_uid) return false;
+
     // исключить повторный вызов события
     if (isset($_SESSION['cnv_old_cart']) and $_SESSION['cnv_old_cart'] == $items) return true;
     $_SESSION['cnv_old_cart'] = $items;
