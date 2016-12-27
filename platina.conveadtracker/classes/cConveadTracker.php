@@ -127,10 +127,10 @@ class cConveadTracker {
   }
 
   /* колбек покупки и изменения заказа для старых версий */
-  static function order($order_id, $fuserID, $order, $is_new = false) {
+  static function order($order_id, $fuserID, $order, $is_new = null) {
     $order_data = self::getOrderData($order_id);
     if (!$order_data) return true;
-    if ($is_new) return self::sendPurchase($order_data->order_id);
+    if ($is_new === null || $is_new === true) return self::sendPurchase($order_data->order_id);
     if (!($tracker = self::getTracker($order_data->lid))) return true;
     return $tracker->webHookOrderUpdate($order_data->order_id, $order_data->state, $order_data->revenue, $order_data->items);
   }
