@@ -298,13 +298,16 @@ class cConveadTracker {
       unset($_SESSION['CONVEAD_PRODUCT_ID']);
     }
     else $js_view_product = '';
+    
+    $json_a = array();
+    foreach($visitor_info as $key=>$value) $json_a[] = $key.':"'.htmlspecialchars($value, ENT_QUOTES, SITE_CHARSET).'"';
 
     $js = "
 <!-- Convead Widget -->
 <script>
   window.ConveadSettings = {
     " . ($visitor_uid ? "visitor_uid: '$visitor_uid'," : '') . "
-    " . ($visitor_info ? "visitor_info: ".json_encode($visitor_info)."," : '') . "
+    " . ($visitor_info ? "visitor_info: {".implode(', ', $json_a)."}," : '') . "
     app_key: '$app_key'
   };
 
