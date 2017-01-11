@@ -345,12 +345,6 @@ class cConveadTracker {
       case 'N':
         $state = 'new';
         break;
-      case 'P':
-        $state = 'paid';
-        break;
-      case 'F':
-        $state = 'shipped';
-        break;
     }
     return $state;
   }
