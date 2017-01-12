@@ -115,10 +115,11 @@ class cConveadTracker {
     return self::sendUpdateCart($items);
   }
   
-  /* колбек покупки и изменения заказа для новых версий */
-  static function newEventOrder($order) {
-    $is_new = $order->isNew();
-    $order_data = self::getOrderData($order->getField('ID'));
+  /* колбек покупки и изменения статуса заказа для новых версий */
+  static function newEventOrderChange($event) {
+    $order = $event->getParameter("ENTITY");
+    $is_new = $event->getParameter("IS_NEW");
+    $order_data = self::getOrderDataFromObject($order);
     if (!$order_data) return true;
     if ($is_new) return self::sendPurchase($order_data->order_id);
     if ($order_data->cancelled == 'Y') return self::orderDelete($order_data->lid, $order_data->order_id);
@@ -317,6 +318,25 @@ class cConveadTracker {
 <!-- /Convead Widget -->";
 
     return $js;
+  }
+
+  /* получение объекта заказа */
+  private static function getOrderDataFromObject($order) {
+    $id = $order->getField('ID');
+    $items = self::getItemsByProperty(array(
+        'ORDER_ID' => $id,
+        'CAN_BUY' => 'Y'
+      )
+    );
+    $ret = new stdClass();
+    $ret->order_id = $id;
+    $ret->revenue = $order->getField('PRICE') - ($order->getField('PRICE_DELIVERY') ? $order->getField('PRICE_DELIVERY') : 0);
+    $ret->items = $items;
+    $ret->lid = $order->getField('LID');
+    $ret->uid = $order->getField('USER_ID');
+    $ret->cancelled = $order->getField('CANCELED');
+    $ret->state = self::switchState($order->getField('STATUS_ID'));
+    return $ret;
   }
 
   /* получение объекта заказа */
