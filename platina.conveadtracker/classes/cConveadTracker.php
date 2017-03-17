@@ -264,7 +264,12 @@ class cConveadTracker {
       $user['LAST_NAME'] && $visitor_info['last_name'] = $user['LAST_NAME'];
       $user['EMAIL'] && $visitor_info['email'] = $user['EMAIL'];
       $user['PERSONAL_PHONE'] && $visitor_info['phone'] = $user['PERSONAL_PHONE'];
-      $user['PERSONAL_BIRTHDAY'] && $visitor_info['date_of_birth'] = date('Y-m-d', $user['PERSONAL_BIRTHDAY']);
+      
+      if ($user['PERSONAL_BIRTHDAY']) {
+        $dates = array_reverse(explode('.', $user['PERSONAL_BIRTHDAY']));
+        $visitor_info['date_of_birth'] = implode('-', $dates);
+      }
+      
       $user['PERSONAL_GENDER'] && $visitor_info['gender'] = ($user['PERSONAL_GENDER'] == 'M' ? 'male' : 'female');
 
       if(file_exists($_SERVER['DOCUMENT_ROOT'].'/bitrix/php_interface/include/helper/ConveadHelper.php'))
