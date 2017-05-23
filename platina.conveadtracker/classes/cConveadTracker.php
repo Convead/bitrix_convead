@@ -136,6 +136,13 @@ class cConveadTracker {
     return $tracker->webHookOrderUpdate($order_data->order_id, $order_data->state, $order_data->revenue, $order_data->items);
   }
 
+  /* колбек покупки в один клик */
+  static function orderOneClick($order_id, $order, $params) {
+    if (\Bitrix\Main\Loader::includeModule('platina.conveadtracker') && class_exists('\cConveadTracker') && is_callable(['\cConveadTracker', 'order'])) {
+      return self::sendPurchase($order_id);
+    }
+  }
+
   /* колбек изменения статуса заказа */
   static function orderSetState($site_id, $order_id, $state) {
     if (!($tracker = self::getTracker($site_id))) return;
@@ -246,11 +253,16 @@ class cConveadTracker {
   private static function sendPurchase($order_id) {
     $order_data = self::getOrderData($order_id);
     if (!$order_data) return false;
+    
+    /* блокировать повторную отправку заказа */
+    if (isset($_SESSION['cnv_old_order']) && $_SESSION['cnv_old_order'] == $order_id) return false;
+    $_SESSION['cnv_old_order'] = $order_id;
+    
+    unset($_SESSION['cnv_old_cart']);
     $visitor_info = $order_data->uid ? self::getVisitorInfo($order_data->uid) : array();
     if ($phone_name = self::getPhoneCode() and !empty($_POST[$phone_name])) $visitor_info['phone'] = $_POST[$phone_name];
     if (!$tracker = self::getTracker($order_data->lid, self::getUid($order_data->uid), $order_data->uid, $visitor_info)) return true;
     if (empty($order_data->items)) return false;
-    unset($_SESSION['cnv_old_cart']);
     return $tracker->eventOrder($order_data->order_id, $order_data->revenue, $order_data->items, $order_data->state);
   }
 
