@@ -1,5 +1,4 @@
 <?php
-CModule::IncludeModule("platina.conveadtracker");
 
 $arClasses = array(
   'ConveadTracker'=>'classes/ConveadTracker.php',
