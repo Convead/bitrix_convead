@@ -8,11 +8,11 @@ class cConveadTracker {
   static function productView($arResult, $user_id = false) {
     if ($arResult['ID'] != '') $arResult['PRODUCT_ID'] = $arResult['ID'];
 
-    if (class_exists('DataManager')) return false;
+    if (class_exists('DataManager')) return true;
 
-    if (self::contains($_SERVER['HTTP_USER_AGENT'], 'facebook.com')) return;
+    if (self::contains($_SERVER['HTTP_USER_AGENT'], 'facebook.com')) return true;
 
-    if (!CModule::includeModule('catalog')) return;
+    if (!CModule::includeModule('catalog')) return true;
 
     global $APPLICATION;
     global $USER;
@@ -54,7 +54,7 @@ class cConveadTracker {
       $_SESSION['CONVEAD_PRODUCT_ID'] = $arResult['PRODUCT_ID'];
       $_SESSION['CONVEAD_PRODUCT_NAME'] = str_replace('"', '&#039;', $arProduct['NAME']);
       $_SESSION['CONVEAD_PRODUCT_URL'] = $product_url;
-      if ($_SESSION['LAST_VIEW_ID'] == $arResult['PRODUCT_ID']) return false;
+      if ($_SESSION['LAST_VIEW_ID'] == $arResult['PRODUCT_ID']) return true;
       else
       {
         $_SESSION['LAST_VIEW_ID'] = $arResult['PRODUCT_ID'];
@@ -75,7 +75,8 @@ class cConveadTracker {
           'CAN_BUY' => 'Y'
         )
     );
-    return self::sendUpdateCart($items);
+    self::sendUpdateCart($items);
+    return true;
   }
 
   /* колбек обновления количества товаров корзины для новых версий */
@@ -93,16 +94,17 @@ class cConveadTracker {
       );
       // исправляем данные состава заказа т.к. они передаются до их обновления
       foreach($items as $k=>$item) if ($item['product_id'] == $basketItem->getProductId()) $items[$k]['qnt'] = $value;
-      return self::sendUpdateCart($items);
+      self::sendUpdateCart($items);
     }
+    return true;
   }
 
   /* колбек обновления корзины */
   static function updateCart($id, $arFields = false) {
-    if (COption::GetOptionString('sale', 'expiration_processing_events') == 'N') return;
-    if (!CModule::includeModule('catalog') || !class_exists('CCatalogSku')) return false;
-    if ($arFields && !isset($arFields['PRODUCT_ID']) && !isset($arFields['DELAY'])) return;
-    if ($arFields && isset($arFields['ORDER_ID'])) return; // покупка
+    if (COption::GetOptionString('sale', 'expiration_processing_events') == 'N') return true;
+    if (!CModule::includeModule('catalog') || !class_exists('CCatalogSku')) return true;
+    if ($arFields && !isset($arFields['PRODUCT_ID']) && !isset($arFields['DELAY'])) return true;
+    if ($arFields && isset($arFields['ORDER_ID'])) return true; // покупка
     $basket = CSaleBasket::GetByID($id);
     $items = self::getItemsByProperty(array(
         'FUSER_ID' => $basket['FUSER_ID'],
@@ -112,7 +114,8 @@ class cConveadTracker {
         'CAN_BUY' => 'Y'
       ), $id, $arFields
     );
-    return self::sendUpdateCart($items);
+    self::sendUpdateCart($items);
+    return true;
   }
   
   /* колбек покупки и изменения статуса заказа для новых версий */
@@ -121,33 +124,46 @@ class cConveadTracker {
     $is_new = $event->getParameter("IS_NEW");
     $order_data = self::getOrderDataFromObject($order);
     if (!$order_data) return true;
-    if ($is_new) return self::sendPurchase($order_data->order_id);
-    if ($order_data->cancelled == 'Y') return self::orderDelete($order_data->lid, $order_data->order_id);
+    if ($is_new) {
+      self::sendPurchase($order_data->order_id);
+      return true;
+    }
+    if ($order_data->cancelled == 'Y') {
+      self::orderDelete($order_data->lid, $order_data->order_id);
+      return true;
+    }
     if (!($tracker = self::getTracker($order_data->lid))) return true;
-    return $tracker->webHookOrderUpdate($order_data->order_id, $order_data->state, $order_data->revenue, $order_data->items);
+    $tracker->webHookOrderUpdate($order_data->order_id, $order_data->state, $order_data->revenue, $order_data->items);
+    return true;
   }
 
   /* колбек покупки и изменения заказа для старых версий */
   static function order($order_id, $fuserID, $order, $is_new = null) {
     $order_data = self::getOrderData($order_id);
     if (!$order_data) return true;
-    if ($is_new === null || $is_new === true) return self::sendPurchase($order_data->order_id);
+    if ($is_new === null || $is_new === true) {
+      self::sendPurchase($order_data->order_id);
+      return true;
+    }
     if (!($tracker = self::getTracker($order_data->lid))) return true;
-    return $tracker->webHookOrderUpdate($order_data->order_id, $order_data->state, $order_data->revenue, $order_data->items);
+    $tracker->webHookOrderUpdate($order_data->order_id, $order_data->state, $order_data->revenue, $order_data->items);
+    return true;
   }
 
   /* колбек покупки в один клик */
   static function orderOneClick($order_id, $order, $params) {
     if (\Bitrix\Main\Loader::includeModule('platina.conveadtracker') && class_exists('\cConveadTracker') && is_callable(['\cConveadTracker', 'order'])) {
-      return self::sendPurchase($order_id);
+      self::sendPurchase($order_id);
     }
+    return true;
   }
 
   /* колбек изменения статуса заказа */
   static function orderSetState($site_id, $order_id, $state) {
-    if (!($tracker = self::getTracker($site_id))) return;
+    if (!($tracker = self::getTracker($site_id))) return true;
     $state = self::switchState($state);
-    return $tracker->webHookOrderUpdate($order_id, $state);
+    $tracker->webHookOrderUpdate($order_id, $state);
+    return true;
   }
 
   /* колбек удаления заказа */
@@ -158,7 +174,7 @@ class cConveadTracker {
 
   /*  колбек события link */
   static function view() {
-    return true;
+    return true; // disabled event
 
     global $USER;
     global $APPLICATION;
@@ -173,7 +189,8 @@ class cConveadTracker {
 
     if (!$tracker = self::getTracker(false, $guest_uid, $visitor_uid, $visitor_info)) return true;
 
-    return $tracker->eventLink($url, $title);
+    $tracker->eventLink($url, $title);
+    return true;
   }
 
   /*  колбек для вставки основного кода widget.js */
@@ -219,7 +236,7 @@ class cConveadTracker {
     else
       return true;
 
-    if (self::contains($_SERVER['HTTP_USER_AGENT'], 'facebook.com')) return;
+    if (self::contains($_SERVER['HTTP_USER_AGENT'], 'facebook.com')) return true;
 
     if (!CModule::includeModule('catalog')) return;
 
