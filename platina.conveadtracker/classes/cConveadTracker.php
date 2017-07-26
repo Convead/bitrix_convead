@@ -152,7 +152,7 @@ class cConveadTracker {
 
   /* колбек покупки в один клик */
   static function orderOneClick($order_id, $order, $params) {
-    if (\Bitrix\Main\Loader::includeModule('platina.conveadtracker') && class_exists('\cConveadTracker') && is_callable(['\cConveadTracker', 'order'])) {
+    if (\Bitrix\Main\Loader::includeModule('platina.conveadtracker') && class_exists('\cConveadTracker') && is_callable(array('\cConveadTracker', 'order'))) {
       self::sendPurchase($order_id);
     }
     return true;
