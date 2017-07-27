@@ -364,7 +364,7 @@ class cConveadTracker {
     );
     $ret = new stdClass();
     $ret->order_id = $id;
-    $ret->revenue = $order->getField('PRICE') - ($order->getField('PRICE_DELIVERY') ? $order->getField('PRICE_DELIVERY') : 0);
+    $ret->revenue = $order->getField('PRICE');
     $ret->items = $items;
     $ret->lid = $order->getField('LID');
     $ret->uid = $order->getField('USER_ID');
