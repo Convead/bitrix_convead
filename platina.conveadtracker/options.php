@@ -6,10 +6,10 @@ if (!$USER->IsAdmin()) {
 	return;
 }
 
-define('ADMIN_MODULE_NAME', 'platina.conveadtracker');
+define('CONVEAD_MODULE_NAME', 'platina.conveadtracker');
 
 
-if ($APPLICATION->GetGroupRight(ADMIN_MODULE_NAME) >= 'R') {
+if ($APPLICATION->GetGroupRight(CONVEAD_MODULE_NAME) >= 'R') {
 
 	Loc::loadMessages($_SERVER["DOCUMENT_ROOT"] . "/bitrix/modules/main/options.php");
 	Loc::loadMessages(__FILE__);
@@ -26,7 +26,7 @@ if ($APPLICATION->GetGroupRight(ADMIN_MODULE_NAME) >= 'R') {
 
 		if (!empty($restore)) {
 		
-			COption::RemoveOption(ADMIN_MODULE_NAME);
+			COption::RemoveOption(CONVEAD_MODULE_NAME);
 			CAdminMessage::ShowMessage(array("MESSAGE" => Loc::getMessage("OPTIONS_RESTORED"), "TYPE" => "OK"));
 		
 		} else {
@@ -36,7 +36,7 @@ if ($APPLICATION->GetGroupRight(ADMIN_MODULE_NAME) >= 'R') {
 
 			if (isset($_REQUEST[$access_token_name])) {
 				COption::SetOptionString(
-					ADMIN_MODULE_NAME,
+					CONVEAD_MODULE_NAME,
 					$access_token_name,
 					$_REQUEST[$access_token_name],
 					Loc::getMessage("PHONE_CODE")
@@ -52,7 +52,7 @@ if ($APPLICATION->GetGroupRight(ADMIN_MODULE_NAME) >= 'R') {
 
 				if (isset($_REQUEST[$tracker_code_name])) {
 					COption::SetOptionString(
-						ADMIN_MODULE_NAME,
+						CONVEAD_MODULE_NAME,
 						$tracker_code_name,
 						$_REQUEST[$tracker_code_name],
 						Loc::getMessage("TRACKER_CODE")
@@ -62,7 +62,7 @@ if ($APPLICATION->GetGroupRight(ADMIN_MODULE_NAME) >= 'R') {
 
 				if (isset($_REQUEST[$phone_code_name])) {
 					COption::SetOptionString(
-						ADMIN_MODULE_NAME,
+						CONVEAD_MODULE_NAME,
 						$phone_code_name,
 						$_REQUEST[$phone_code_name],
 						Loc::getMessage("PHONE_CODE")
@@ -96,16 +96,16 @@ if ($APPLICATION->GetGroupRight(ADMIN_MODULE_NAME) >= 'R') {
 		<?php
 		$tabControl->BeginNextTab();
 
-		$single_tracker_code = COption::GetOptionString(ADMIN_MODULE_NAME, "tracker_code", '');
-		$single_phone_code = COption::GetOptionString(ADMIN_MODULE_NAME, "phone_code", '');
+		$single_tracker_code = COption::GetOptionString(CONVEAD_MODULE_NAME, "tracker_code", '');
+		$single_phone_code = COption::GetOptionString(CONVEAD_MODULE_NAME, "phone_code", '');
 
 		$rsSites = CSite::GetList($by="sort", $order="desc");
 		while ($arSite = $rsSites->Fetch()):
 			$tracker_code_name = "tracker_code_".$arSite['ID'];
 			$phone_code_name = "phone_code_".$arSite['ID'];
 
-			$domain_tracker_code = COption::GetOptionString(ADMIN_MODULE_NAME, $tracker_code_name, '');
-			$domain_phone_code = COption::GetOptionString(ADMIN_MODULE_NAME, $phone_code_name, '');
+			$domain_tracker_code = COption::GetOptionString(CONVEAD_MODULE_NAME, $tracker_code_name, '');
+			$domain_phone_code = COption::GetOptionString(CONVEAD_MODULE_NAME, $phone_code_name, '');
 		?>
 
 			<tr class="heading">
