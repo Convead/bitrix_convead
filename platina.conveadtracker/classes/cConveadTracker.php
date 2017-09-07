@@ -382,6 +382,18 @@ class cConveadTracker {
         'CAN_BUY' => 'Y'
       )
     );
+
+    /* сделана пкупка в один клик, но состав заказа отсутствует */
+    if (count($items) == 0 and !empty($_REQUEST['ELEMENT_ID']) and $pr_price = CCatalogProduct::GetOptimalPrice($_REQUEST['ELEMENT_ID'])) {
+      $items = array(
+        array(
+          'product_id' => $_REQUEST['ELEMENT_ID'],
+          'qnt' => 1,
+          'price' => $pr_price['DISCOUNT_PRICE']
+        )
+      );
+    }
+
     $ret = new stdClass();
     $ret->order_id = $order['ID'];
     $ret->revenue = $order['PRICE'] - (isset($order['PRICE_DELIVERY']) ? $order['PRICE_DELIVERY'] : 0);
