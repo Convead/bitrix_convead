@@ -49,7 +49,7 @@ class cConveadTracker {
 
       $product_id = $arResult['PRODUCT_ID'];
       $product_name = $arProduct['NAME'];
-      $product_url = self::getDelautPageUrl($arProduct);
+      $product_url = self::getDetailPageUrl($arProduct);
 
       $_SESSION['CONVEAD_PRODUCT_ID'] = $arResult['PRODUCT_ID'];
       $_SESSION['CONVEAD_PRODUCT_NAME'] = str_replace('"', '&#039;', $arProduct['NAME']);
@@ -487,7 +487,7 @@ class cConveadTracker {
     return $_SERVER['SERVER_NAME'];
   }
 
-  private static function getDelautPageUrl($page) {
+  private static function getDetailPageUrl($page) {
     return 'http://' . self::getDomain() . $page['DETAIL_PAGE_URL'];
   }
 
