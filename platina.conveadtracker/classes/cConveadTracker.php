@@ -69,7 +69,7 @@ class cConveadTracker {
     if (COption::GetOptionString('sale', 'expiration_processing_events') == 'Y') return true;
     $items = self::getItemsByProperty(array(
           'FUSER_ID' => $basket->getFUserId(),
-          //'LID' => SITE_ID,
+          'LID' => SITE_ID,
           'ORDER_ID' => 'NULL',
           'DELAY' => 'N',
           'CAN_BUY' => 'Y'
@@ -86,7 +86,7 @@ class cConveadTracker {
     if ($field == 'QUANTITY' and isset($_REQUEST['action']) and $_REQUEST['action'] == 'recalculate') {
       $items = self::getItemsByProperty(array(
           'FUSER_ID' => $basketItem->getCollection()->getFUserId(),
-          //'LID' => SITE_ID,
+          'LID' => SITE_ID,
           'ORDER_ID' => 'NULL',
           'DELAY' => 'N',
           'CAN_BUY' => 'Y'
@@ -108,7 +108,7 @@ class cConveadTracker {
     $basket = CSaleBasket::GetByID($id);
     $items = self::getItemsByProperty(array(
         'FUSER_ID' => $basket['FUSER_ID'],
-        //'LID' => SITE_ID,
+        'LID' => SITE_ID,
         'ORDER_ID' => 'NULL',
         'DELAY' => 'N',
         'CAN_BUY' => 'Y'
