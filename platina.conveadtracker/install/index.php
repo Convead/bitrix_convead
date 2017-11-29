@@ -1,6 +1,7 @@
 <?php
 
 use Bitrix\Main\Localization\Loc;
+use Bitrix\Main\Config\Option;
 
 Loc::loadMessages(__FILE__);
 IncludeModuleLangFile(__FILE__);
@@ -42,6 +43,11 @@ class platina_conveadtracker extends CModule {
 
         $this->InstallFiles();
         $this->InstallDB();
+
+        /* активация тригера OnBeforeViewedAdd, если он отключен в настройках */
+        if ('Y' !== Option::get('sale', 'product_viewed_save', 'N')) {
+          Option::set('sale', 'product_viewed_save', 'Y');
+        }
     }
 
     public function DoUninstall() {
