@@ -10,8 +10,6 @@ class cConveadTracker {
 
     if (class_exists('DataManager')) return true;
 
-    if (self::contains($_SERVER['HTTP_USER_AGENT'], 'facebook.com')) return true;
-
     if (!CModule::includeModule('catalog')) return true;
 
     global $APPLICATION;
@@ -26,38 +24,34 @@ class cConveadTracker {
     $guest_uid = self::getUid($visitor_uid);
     if (!$tracker = self::getTracker(false, $guest_uid, $visitor_uid, $visitor_info)) return true;
 
-    $arProduct = CCatalogProduct::GetByIDEx($arResult['PRODUCT_ID']);
+    $product_id = $arResult['PRODUCT_ID'];
+    $arProduct = CCatalogProduct::GetByIDEx($product_id);
     if ($arProduct && strpos($APPLICATION->GetCurPage(), $arProduct['DETAIL_PAGE_URL']) !== false)
     {
-      if (CCatalogSku::IsExistOffers($arResult['PRODUCT_ID']))
+      if (
+        (function_exists('CCatalogSku::IsExistOffers') and CCatalogSku::IsExistOffers($variant_id)) // Deprecated from v15.0.2
+        or
+        ($tmp = CCatalogSKU::getExistOffers(array($product_id)) and !empty($tmp[$product_id])) // Avalible from v15.0.2
+      )
       {
-        $arOffers =
-          CIBlockPriceTools::GetOffersArray(array('IBLOCK_ID' => $arProduct['IBLOCK_ID']), array($arResult['PRODUCT_ID']), array(), array(
-              'ID',
-              'ACTIVE'
-            )
-          );
-        foreach ($arOffers as $array)
+        $arOffers = CIBlockPriceTools::GetOffersArray(array('IBLOCK_ID' => $arProduct['IBLOCK_ID']), array($product_id), array(), array('ID', 'ACTIVE'));
+        foreach ($arOffers as $offer)
         {
-          if ($array['ACTIVE'] == 'Y')
+          if ($offer['ACTIVE'] == 'Y')
           {
-            $arResult['PRODUCT_ID'] = $array['ID'];
+            $product_id = $offer['ID'];
             break;
           }
         }
       }
 
-      $product_id = $arResult['PRODUCT_ID'];
-      $product_name = $arProduct['NAME'];
-      $product_url = self::getDetailPageUrl($arProduct);
-
-      $_SESSION['CONVEAD_PRODUCT_ID'] = $arResult['PRODUCT_ID'];
-      $_SESSION['CONVEAD_PRODUCT_NAME'] = str_replace('"', '&#039;', $arProduct['NAME']);
-      $_SESSION['CONVEAD_PRODUCT_URL'] = $product_url;
-      if ($_SESSION['LAST_VIEW_ID'] == $arResult['PRODUCT_ID']) return true;
+      $_SESSION['CONVEAD_PRODUCT_ID'] = $product_id;
+      $_SESSION['CONVEAD_PRODUCT_NAME'] = $arProduct['NAME'];
+      $_SESSION['CONVEAD_PRODUCT_URL'] = self::getDetailPageUrl($arProduct);
+      if ($_SESSION['LAST_VIEW_ID'] == $product_id) return true;
       else
       {
-        $_SESSION['LAST_VIEW_ID'] = $arResult['PRODUCT_ID'];
+        $_SESSION['LAST_VIEW_ID'] = $product_id;
         return true;
       }
     }
@@ -228,43 +222,6 @@ class cConveadTracker {
     return true;
   }
 
-  static function productViewCustom($id, $arFields) {
-    if ($arFields['PRODUCT_ID'])
-      $arResult['PRODUCT_ID'] = $arFields['PRODUCT_ID'];
-    else if($id['PRODUCT_ID'])
-      $arResult['PRODUCT_ID'] = $id['PRODUCT_ID'];
-    else
-      return true;
-
-    if (self::contains($_SERVER['HTTP_USER_AGENT'], 'facebook.com')) return true;
-
-    if (!CModule::includeModule('catalog')) return;
-
-    global $APPLICATION;
-    global $USER;
-
-    $visitor_uid = false;
-    if(!$user_id and $USER)
-      $user_id = $USER->GetID();
-
-    $visitor_info = false;
-    if ($user_id && $visitor_info = self::getVisitorInfo($user_id)) {
-      $visitor_uid = (int) $user_id;
-    }
-    $guest_uid = self::getUid($visitor_uid);
-    if (!$tracker = self::getTracker(false, $guest_uid, $visitor_uid, $visitor_info)) return true;
-
-    $arProduct = CCatalogProduct::GetByIDEx($arResult['PRODUCT_ID']);
-
-    $product_id = $arResult['PRODUCT_ID'];
-    $product_name = str_replace('"', '&#039;', $arProduct['NAME']);
-    $product_url = 'http://' . self::getDomain() . $arProduct['DETAIL_PAGE_URL'];
-
-    $result = $tracker->eventProductView($product_id, $product_name, $product_url);
-
-    return true;
-  }
-
   /* --- приватные методы --- */
 
   private static function sendPurchase($order_id) {
@@ -318,8 +275,7 @@ class cConveadTracker {
     global $USER;
     global $APPLICATION;
 
-    $url = $APPLICATION->GetCurUri();
-    if (self::startsWith($url, '/bitrix/admin/')) return;
+    if (self::startsWith($APPLICATION->GetCurUri(), '/bitrix/admin/')) return;
 
     $visitor_info = array();
     $visitor_uid = false;
@@ -328,9 +284,13 @@ class cConveadTracker {
     $guest_uid = self::getUid($visitor_uid);
 
     if (isset($_SESSION['CONVEAD_PRODUCT_ID'])) {
-      $js_view_product = "convead('event', 'view_product', {product_id: '".$_SESSION['CONVEAD_PRODUCT_ID']."', product_name: '".$_SESSION['CONVEAD_PRODUCT_NAME']."', product_url: '".$_SESSION['CONVEAD_PRODUCT_URL']."'});";
-      $_SESSION['CONVEAD_PRODUCT_ID'] = null;
+      $product_id = $_SESSION['CONVEAD_PRODUCT_ID'];
+      $name = htmlentities($_SESSION['CONVEAD_PRODUCT_NAME'], ENT_QUOTES);
+      $url = $_SESSION['CONVEAD_PRODUCT_URL'];
+
       unset($_SESSION['CONVEAD_PRODUCT_ID']);
+      
+      $js_view_product = "convead('event', 'view_product', {product_id: '{$product_id}', product_name: '{$name}', product_url: '{$url}'});";
     }
     else $js_view_product = '';
     
