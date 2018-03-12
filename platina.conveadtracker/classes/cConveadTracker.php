@@ -34,7 +34,7 @@ class cConveadTracker {
         ($tmp = CCatalogSKU::getExistOffers(array($product_id)) and !empty($tmp[$product_id])) // Avalible from v15.0.2
       )
       {
-        $arOffers = CIBlockPriceTools::GetOffersArray(array('IBLOCK_ID' => $arProduct['IBLOCK_ID']), array($product_id), array(), array('ID', 'ACTIVE'));
+        $arOffers = CIBlockPriceTools::GetOffersArray(array('IBLOCK_ID' => $arProduct['IBLOCK_ID']), array($product_id), array(), array('ID', 'ACTIVE'), array(), 1, array(), null);
         foreach ($arOffers as $offer)
         {
           if ($offer['ACTIVE'] == 'Y')
