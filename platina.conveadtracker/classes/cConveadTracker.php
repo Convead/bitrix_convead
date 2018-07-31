@@ -153,8 +153,8 @@ class cConveadTracker {
   }
 
   /* колбек изменения статуса заказа */
-  static function orderSetState($site_id, $order_id = false, $state = false) {
-    if (!($tracker = self::getTracker($site_id))) return true;
+  static function orderSetState($order_id, $state) {
+    if (!($tracker = self::getTracker(SITE_ID))) return true;
     $state = self::switchState($state);
     $tracker->webHookOrderUpdate($order_id, $state);
     return true;
