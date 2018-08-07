@@ -106,7 +106,7 @@ class cConveadTracker {
         'ORDER_ID' => 'NULL',
         'DELAY' => 'N',
         'CAN_BUY' => 'Y'
-      ), $id, $arFields
+      )
     );
     self::sendUpdateCart($items);
     return true;
@@ -166,24 +166,8 @@ class cConveadTracker {
     return $tracker->webHookOrderUpdate($order_id, 'cancelled');
   }
 
-  /*  колбек события link */
+  /* устаревший колбек события link */
   static function view() {
-    return true; // disabled event
-
-    global $USER;
-    global $APPLICATION;
-
-    $visitor_info = false;
-    $visitor_uid = false;
-    if ($USER and $USER->GetID() and $visitor_info = self::getVisitorInfo($USER->GetID())) $visitor_uid = $USER->GetID();
-
-    $guest_uid = self::getUid($visitor_uid);
-    $title = $APPLICATION->GetTitle();
-    if ($url = self::getCurlUri()) return true;
-
-    if (!$tracker = self::getTracker(false, $guest_uid, $visitor_uid, $visitor_info)) return true;
-
-    $tracker->eventLink($url, $title);
     return true;
   }
 
@@ -317,11 +301,7 @@ class cConveadTracker {
   /* получение объекта заказа */
   private static function getOrderDataFromObject($order) {
     $id = $order->getField('ID');
-    $items = self::getItemsByProperty(array(
-        'ORDER_ID' => $id,
-        'CAN_BUY' => 'Y'
-      )
-    );
+    $items = self::getItemsByOrderId($id);
     $ret = new stdClass();
     $ret->order_id = $id;
     $ret->revenue = $order->getField('PRICE');
@@ -337,11 +317,7 @@ class cConveadTracker {
   private static function getOrderData($order_id) {
     $order = CSaleOrder::GetByID(intval($order_id));
     if (!$order['ID']) return false;
-    $items = self::getItemsByProperty(array(
-        'ORDER_ID' => $order['ID'],
-        'CAN_BUY' => 'Y'
-      )
-    );
+    $items = self::getItemsByOrderId($order['ID']);
 
     /* сделана пкупка в один клик, но состав заказа отсутствует */
     if (count($items) == 0 and !empty($_REQUEST['ELEMENT_ID']) and $pr_price = CCatalogProduct::GetOptimalPrice($_REQUEST['ELEMENT_ID'])) {
@@ -397,17 +373,60 @@ class cConveadTracker {
     else return false;
   }
 
-  private static function getItemsByProperty($property, $id = false, $arFields = true) {
-    $items = array();
+  private static function getItemsByOrderId($order_id) {
+    $property = array(
+      'ORDER_ID' => $order_id,
+      'CAN_BUY' => 'Y'
+    );
     $orders = CSaleBasket::GetList(array(), $property, false, false, array());
+    $items = array();
     while ($order = $orders->Fetch()) {
-      if (!$arFields) { // удаленный
-        if ($order['ID'] == $id) continue;
-      }
       $item['product_id'] = $order['PRODUCT_ID'];
       $item['qnt'] = $order['QUANTITY'];
       $item['price'] = $order['PRICE'];
       $items[] = $item;
+    }
+    return $items;
+  }
+
+  private static function getItemsByProperty($property) {
+    $dbBasketItems = CSaleBasket::GetList(array(), $property, false, false, array(
+     'ID',
+     'PRODUCT_ID',
+     'QUANTITY',
+     'PRICE',
+     'DISCOUNT_PRICE',
+     'WEIGHT'
+    ));
+
+    $allSum = 0;
+    $allWeight = 0;
+    $arItems = array();
+    while ($arBasketItems = $dbBasketItems->Fetch()) {   
+      $allSum += ($arItem["PRICE"] * $arItem["QUANTITY"]);
+      $allWeight += ($arItem["WEIGHT"] * $arItem["QUANTITY"]);
+      $arItems[] = $arBasketItems;
+    } 
+    $arOrder = array(
+      'SITE_ID' => SITE_ID,
+      'USER_ID' => $GLOBALS["USER"]->GetID(),
+      'ORDER_PRICE' => $allSum,
+      'ORDER_WEIGHT' => $allWeight,
+      'BASKET_ITEMS' => $arItems
+    );
+    $arOptions = array(
+      'COUNT_DISCOUNT_4_ALL_QUANTITY' => 'Y',
+    );
+    $arErrors = array();
+    CSaleDiscount::DoProcessOrder($arOrder, $arOptions, $arErrors);
+    
+    $items = array();
+    foreach ($arOrder['BASKET_ITEMS'] as $orderItem) {
+      $items[] = array(
+      'product_id' => $orderItem['PRODUCT_ID'],
+      'qnt' => $orderItem['QUANTITY'],
+      'price' => $orderItem['PRICE']
+      );
     }
     return $items;
   }
