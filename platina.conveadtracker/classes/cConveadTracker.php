@@ -5,7 +5,7 @@ class cConveadTracker {
   static $MODULE_ID = 'platina.conveadtracker';
 
   /*  колбек страницы товара */
-  static function productView($arResult, $user_id = false) {
+  static function productView($arResult) {
     if ($arResult['ID'] != '') $arResult['PRODUCT_ID'] = $arResult['ID'];
 
     if (class_exists('DataManager')) return true;
@@ -16,7 +16,7 @@ class cConveadTracker {
     global $USER;
 
     $visitor_uid = false;
-    if (!$user_id and $USER) $user_id = $USER->GetID();
+    $user_id = $USER->GetID();
 
     $visitor_info = false;
     if ($user_id && $visitor_info = self::getVisitorInfo($user_id)) $visitor_uid = (int)$user_id;
