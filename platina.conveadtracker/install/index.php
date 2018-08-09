@@ -47,6 +47,10 @@ class platina_conveadtracker extends CModule {
         if ('Y' !== Option::get('sale', 'product_viewed_save', 'N')) {
           Option::set('sale', 'product_viewed_save', 'Y');
         }
+
+        LocalRedirect("/bitrix/admin/settings.php?lang=ru&mid=platina.conveadtracker&mid_menu=1", false);
+
+        return true;
     }
 
     public function DoUninstall() {
@@ -67,6 +71,8 @@ class platina_conveadtracker extends CModule {
 
         $this->UnInstallFiles();
         UnRegisterModule($this->MODULE_ID);
+
+        return true;
     }
 
     function InstallFiles() {

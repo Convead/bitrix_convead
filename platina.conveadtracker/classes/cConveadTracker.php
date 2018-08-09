@@ -2,10 +2,10 @@
 
 class cConveadTracker {
 
-  static $MODULE_ID = 'platina.conveadtracker';
+  public static $MODULE_ID = 'platina.conveadtracker';
 
   /*  колбек страницы товара */
-  static function productView($arResult) {
+  public static function productView($arResult) {
     if ($arResult['ID'] != '') $arResult['PRODUCT_ID'] = $arResult['ID'];
 
     if (class_exists('DataManager')) return true;
@@ -58,7 +58,7 @@ class cConveadTracker {
   }
 
   /* колбек обновления товаров корзины для новых версий */
-  static function newEventUpdateCart($basket) {
+  public static function newEventUpdateCart($basket) {
     // проверяем, что не включена поддержка старых событий
     if (COption::GetOptionString('sale', 'expiration_processing_events') == 'Y') return true;
     $items = self::getItemsByProperty(array(
@@ -74,7 +74,7 @@ class cConveadTracker {
   }
 
   /* колбек обновления количества товаров корзины для новых версий */
-  static function newEventSetQtyCart($basketItem, $field, $value) {
+  public static function newEventSetQtyCart($basketItem, $field, $value) {
     // проверяем, что не включена поддержка старых событий
     if (COption::GetOptionString('sale', 'expiration_processing_events') == 'Y') return true;
     if ($field == 'QUANTITY' and isset($_REQUEST['action']) and $_REQUEST['action'] == 'recalculate') {
@@ -94,7 +94,7 @@ class cConveadTracker {
   }
 
   /* колбек обновления корзины */
-  static function updateCart($id, $arFields = false) {
+  public static function updateCart($id, $arFields = false) {
     if (COption::GetOptionString('sale', 'expiration_processing_events') == 'N') return true;
     if (!CModule::includeModule('catalog') || !class_exists('CCatalogSku')) return true;
     if ($arFields && !isset($arFields['PRODUCT_ID']) && !isset($arFields['DELAY'])) return true;
@@ -113,7 +113,7 @@ class cConveadTracker {
   }
   
   /* колбек покупки и изменения статуса заказа для новых версий */
-  static function newEventOrderChange($event) {
+  public static function newEventOrderChange($event) {
     $order = $event->getParameter("ENTITY");
     $is_new = $event->getParameter("IS_NEW");
     $order_data = self::getOrderDataFromObject($order);
@@ -132,7 +132,7 @@ class cConveadTracker {
   }
 
   /* колбек покупки и изменения заказа для старых версий */
-  static function order($order_id, $fuserID, $order, $is_new = null) {
+  public static function order($order_id, $fuserID, $order, $is_new = null) {
     $order_data = self::getOrderData($order_id);
     if (!$order_data) return true;
     if ($is_new === null || $is_new === true) {
@@ -145,7 +145,7 @@ class cConveadTracker {
   }
 
   /* колбек покупки в один клик */
-  static function orderOneClick($order_id, $order, $params) {
+  public static function orderOneClick($order_id, $order, $params) {
     if (\Bitrix\Main\Loader::includeModule('platina.conveadtracker') && class_exists('\cConveadTracker') && is_callable(array('\cConveadTracker', 'order'))) {
       self::sendPurchase($order_id);
     }
@@ -153,7 +153,7 @@ class cConveadTracker {
   }
 
   /* колбек изменения статуса заказа */
-  static function orderSetState($order_id, $state) {
+  public static function orderSetState($order_id, $state) {
     if (!($tracker = self::getTracker(SITE_ID))) return true;
     $state = self::switchState($state);
     $tracker->webHookOrderUpdate($order_id, $state);
@@ -161,28 +161,20 @@ class cConveadTracker {
   }
 
   /* колбек удаления заказа */
-  static function orderDelete($site_id, $order_id) {
+  public static function orderDelete($site_id, $order_id) {
     if (!($tracker = self::getTracker($site_id))) return;
     return $tracker->webHookOrderUpdate($order_id, 'cancelled');
   }
 
   /* устаревший колбек события link */
-  static function view() {
+  public static function view() {
     return true;
   }
 
   /*  колбек для вставки основного кода widget.js */
-  static function head() {
+  public static function head() {
     if (!self::getCurlUri()) return true;
-
     if (!($app_key = self::getAppKey())) return false;
-
-    global $APPLICATION, $USER;
-
-    $visitor_info = false;
-    $visitor_uid = false;
-    if ($USER and $USER->GetID() and $visitor_info = self::getVisitorInfo($USER->GetID())) $visitor_uid = $USER->GetID();
-    $guest_uid = self::getUid($visitor_uid);
 
     if (CHTMLPagesCache::IsOn())
     {
@@ -205,8 +197,6 @@ class cConveadTracker {
 
     return true;
   }
-
-  /* --- приватные методы --- */
 
   private static function sendPurchase($order_id) {
     $order_data = self::getOrderData($order_id);
@@ -259,13 +249,9 @@ class cConveadTracker {
     global $USER;
     global $APPLICATION;
 
-    if (self::startsWith($APPLICATION->GetCurUri(), '/bitrix/admin/')) return;
-
     $visitor_info = array();
     $visitor_uid = false;
     if ($USER and $USER->GetID() and $visitor_info = self::getVisitorInfo($USER->GetID())) $visitor_uid = $USER->GetID();
-
-    $guest_uid = self::getUid($visitor_uid);
 
     if (isset($_SESSION['CONVEAD_PRODUCT_ID'])) {
       $product_id = $_SESSION['CONVEAD_PRODUCT_ID'];
@@ -361,7 +347,7 @@ class cConveadTracker {
     $visitor_info = self::getVisitorInfo($user_id);
     if ($visitor_info || $user_id !== FALSE) $visitor_uid = $user_id;
 
-    $guest_uid = self::getUid($visitor_uid);
+    $guest_uid = self::getUid();
 
     if (!$guest_uid and !$visitor_uid) return false;
 
@@ -406,10 +392,11 @@ class cConveadTracker {
       $allSum += ($arItem["PRICE"] * $arItem["QUANTITY"]);
       $allWeight += ($arItem["WEIGHT"] * $arItem["QUANTITY"]);
       $arItems[] = $arBasketItems;
-    } 
+    }
+    global $USER;
     $arOrder = array(
       'SITE_ID' => SITE_ID,
-      'USER_ID' => $GLOBALS["USER"]->GetID(),
+      'USER_ID' => $USER->GetID(),
       'ORDER_PRICE' => $allSum,
       'ORDER_WEIGHT' => $allWeight,
       'BASKET_ITEMS' => $arItems
@@ -418,8 +405,9 @@ class cConveadTracker {
       'COUNT_DISCOUNT_4_ALL_QUANTITY' => 'Y',
     );
     $arErrors = array();
+    // применение правил скидок для корзины
     CSaleDiscount::DoProcessOrder($arOrder, $arOptions, $arErrors);
-    
+
     $items = array();
     foreach ($arOrder['BASKET_ITEMS'] as $orderItem) {
       $items[] = array(
@@ -431,8 +419,8 @@ class cConveadTracker {
     return $items;
   }
 
-  private static function getUid($visitor_uid) {
-    return (!$visitor_uid and !empty($_COOKIE['convead_guest_uid'])) ? $_COOKIE['convead_guest_uid'] : false;
+  private static function getUid() {
+    return !empty($_COOKIE['convead_guest_uid']) ? $_COOKIE['convead_guest_uid'] : false;
   }
 
   private static function getCurlUri() {
