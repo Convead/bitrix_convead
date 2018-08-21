@@ -62,12 +62,12 @@ class cConveadTracker {
     // проверяем, что не включена поддержка старых событий
     if (COption::GetOptionString('sale', 'expiration_processing_events') == 'Y') return true;
     $items = self::getItemsByProperty(array(
-          'FUSER_ID' => $basket->getFUserId(),
-          'LID' => SITE_ID,
-          'ORDER_ID' => 'NULL',
-          'DELAY' => 'N',
-          'CAN_BUY' => 'Y'
-        )
+        'FUSER_ID' => $basket->getFUserId(),
+        'LID' => SITE_ID,
+        'ORDER_ID' => 'NULL',
+        'DELAY' => 'N',
+        'CAN_BUY' => 'Y'
+      )
     );
     self::sendUpdateCart($items);
     return true;
@@ -75,21 +75,6 @@ class cConveadTracker {
 
   /* колбек обновления количества товаров корзины для новых версий */
   public static function newEventSetQtyCart($basketItem, $field, $value) {
-    // проверяем, что не включена поддержка старых событий
-    if (COption::GetOptionString('sale', 'expiration_processing_events') == 'Y') return true;
-    if ($field == 'QUANTITY' and isset($_REQUEST['action']) and $_REQUEST['action'] == 'recalculate') {
-      $items = self::getItemsByProperty(array(
-          'FUSER_ID' => $basketItem->getCollection()->getFUserId(),
-          'LID' => SITE_ID,
-          'ORDER_ID' => 'NULL',
-          'DELAY' => 'N',
-          'CAN_BUY' => 'Y'
-        )
-      );
-      // исправляем данные состава заказа т.к. они передаются до их обновления
-      foreach($items as $k=>$item) if ($item['product_id'] == $basketItem->getProductId()) $items[$k]['qnt'] = $value;
-      self::sendUpdateCart($items);
-    }
     return true;
   }
 
@@ -377,43 +362,35 @@ class cConveadTracker {
 
   private static function getItemsByProperty($property) {
     $dbBasketItems = CSaleBasket::GetList(array(), $property, false, false, array(
-     'ID',
-     'PRODUCT_ID',
-     'QUANTITY',
-     'PRICE',
-     'DISCOUNT_PRICE',
-     'WEIGHT'
+      'ID',
+      'PRODUCT_ID',
+      'QUANTITY',
+      'PRICE',
+      'DISCOUNT_PRICE',
+      'WEIGHT'
     ));
-
-    $allSum = 0;
-    $allWeight = 0;
-    $arItems = array();
-    while ($arBasketItems = $dbBasketItems->Fetch()) {   
-      $allSum += ($arItem["PRICE"] * $arItem["QUANTITY"]);
-      $allWeight += ($arItem["WEIGHT"] * $arItem["QUANTITY"]);
-      $arItems[] = $arBasketItems;
+    
+    // получение цен с учетом скидок правил корзины для D7
+    $prices = array();
+    if (class_exists('Bitrix\Sale\Basket')) {
+      $basket = \Bitrix\Sale\Basket::loadItemsForFUser(
+        \Bitrix\Sale\Fuser::getId(),
+        \Bitrix\Main\Context::getCurrent()->getSite()
+      );
+      $fuser = new \Bitrix\Sale\Discount\Context\Fuser($basket->getFUserId(true));
+      $discounts = \Bitrix\Sale\Discount::buildFromBasket($basket, $fuser);
+      $discounts->calculate();
+      $result = $discounts->getApplyResult(true);
+      $prices = $result['PRICES']['BASKET'];
     }
-    global $USER;
-    $arOrder = array(
-      'SITE_ID' => SITE_ID,
-      'USER_ID' => $USER->GetID(),
-      'ORDER_PRICE' => $allSum,
-      'ORDER_WEIGHT' => $allWeight,
-      'BASKET_ITEMS' => $arItems
-    );
-    $arOptions = array(
-      'COUNT_DISCOUNT_4_ALL_QUANTITY' => 'Y',
-    );
-    $arErrors = array();
-    // применение правил скидок для корзины
-    CSaleDiscount::DoProcessOrder($arOrder, $arOptions, $arErrors);
-
+    
     $items = array();
-    foreach ($arOrder['BASKET_ITEMS'] as $orderItem) {
+    while ($arBasketItems = $dbBasketItems->Fetch()) {
+      $id = $arBasketItems['ID'];
       $items[] = array(
-      'product_id' => $orderItem['PRODUCT_ID'],
-      'qnt' => $orderItem['QUANTITY'],
-      'price' => $orderItem['PRICE']
+        'product_id' => $arBasketItems['PRODUCT_ID'],
+        'qnt' => $arBasketItems['QUANTITY'],
+        'price' => (isset($prices[$id]) ? $prices[$id]['PRICE'] : $arBasketItems['PRICE'])
       );
     }
     return $items;

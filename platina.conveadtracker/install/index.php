@@ -37,7 +37,7 @@ class platina_conveadtracker extends CModule {
         RegisterModuleDependences("sale", "OnBeforeViewedAdd", $this->MODULE_ID, "cConveadTracker", "productView", "100");
         RegisterModuleDependences("sale", "OnSaleStatusOrder", $this->MODULE_ID, "cConveadTracker", "orderSetState", "100");
         RegisterModuleDependences("sale", "OnSaleBasketSaved", $this->MODULE_ID, "cConveadTracker", "newEventUpdateCart", "100");
-        RegisterModuleDependences("sale", "OnSaleBasketItemSetField", $this->MODULE_ID, "cConveadTracker", "newEventSetQtyCart", "100");
+        // RegisterModuleDependences("sale", "OnSaleBasketItemSetField", $this->MODULE_ID, "cConveadTracker", "newEventSetQtyCart", "100");
         \Bitrix\Main\EventManager::getInstance()->registerEventHandler("sale", "OnSaleOrderSaved", $this->MODULE_ID, "cConveadTracker", "newEventOrderChange");
 
         $this->InstallFiles();
@@ -66,7 +66,7 @@ class platina_conveadtracker extends CModule {
         UnRegisterModuleDependences("sale", "OnBeforeViewedAdd", $this->MODULE_ID, "cConveadTracker", "productView");
         UnRegisterModuleDependences("sale", "OnSaleStatusOrder", $this->MODULE_ID, "cConveadTracker", "orderSetState");
         UnRegisterModuleDependences("sale", "OnSaleBasketSaved", $this->MODULE_ID, "cConveadTracker", "newEventUpdateCart"); 
-        UnRegisterModuleDependences("sale", "OnSaleBasketItemSetField", $this->MODULE_ID, "cConveadTracker", "newEventSetQtyCart");
+        // UnRegisterModuleDependences("sale", "OnSaleBasketItemSetField", $this->MODULE_ID, "cConveadTracker", "newEventSetQtyCart");
         \Bitrix\Main\EventManager::getInstance()->unRegisterEventHandler("sale", "OnSaleOrderSaved", $this->MODULE_ID, "cConveadTracker", "newEventOrderChange");
 
         $this->UnInstallFiles();
