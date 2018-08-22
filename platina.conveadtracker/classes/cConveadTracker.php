@@ -379,9 +379,11 @@ class cConveadTracker {
       );
       $fuser = new \Bitrix\Sale\Discount\Context\Fuser($basket->getFUserId(true));
       $discounts = \Bitrix\Sale\Discount::buildFromBasket($basket, $fuser);
-      $discounts->calculate();
-      $result = $discounts->getApplyResult(true);
-      $prices = $result['PRICES']['BASKET'];
+      if ($discounts) {
+        $discounts->calculate();
+        $result = $discounts->getApplyResult(true);
+        $prices = $result['PRICES']['BASKET'];
+      }
     }
     
     $items = array();
