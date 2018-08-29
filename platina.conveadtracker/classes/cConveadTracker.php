@@ -430,7 +430,7 @@ class cConveadTracker {
   }
 
   private static function getDomain() {
-    return $_SERVER['SERVER_NAME'];
+    return !empty($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
   }
 
   private static function getDetailPageUrl($page) {
