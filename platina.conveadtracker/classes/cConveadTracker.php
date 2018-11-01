@@ -372,7 +372,7 @@ class cConveadTracker {
     
     // получение цен с учетом скидок правил корзины для D7
     $prices = array();
-    if (class_exists('Bitrix\Sale\Basket')) {
+    if (class_exists('Bitrix\Sale\Basket') && class_exists('Bitrix\Sale\Discount\Context\Fuser')) {
       $basket = \Bitrix\Sale\Basket::loadItemsForFUser(
         \Bitrix\Sale\Fuser::getId(),
         \Bitrix\Main\Context::getCurrent()->getSite()
