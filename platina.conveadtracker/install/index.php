@@ -1,7 +1,7 @@
 <?php
 
-use Bitrix\Main\Localization\Loc;
-use Bitrix\Main\Config\Option;
+use Bitrix\Main\Localization\Loc,
+    Bitrix\Main\Config\Option;
 
 Loc::loadMessages(__FILE__);
 IncludeModuleLangFile(__FILE__);
@@ -37,7 +37,10 @@ class platina_conveadtracker extends CModule {
         RegisterModuleDependences("sale", "OnBeforeViewedAdd", $this->MODULE_ID, "cConveadTracker", "productView", "100");
         RegisterModuleDependences("sale", "OnSaleStatusOrder", $this->MODULE_ID, "cConveadTracker", "orderSetState", "100");
         RegisterModuleDependences("sale", "OnSaleBasketSaved", $this->MODULE_ID, "cConveadTracker", "newEventUpdateCart", "100");
-        // RegisterModuleDependences("sale", "OnSaleBasketItemSetField", $this->MODULE_ID, "cConveadTracker", "newEventSetQtyCart", "100");
+
+        RegisterModuleDependences('sale', 'onManagerCouponAdd', $this->MODULE_ID, 'cConveadTracker', 'updateCartWithCoupon');
+        RegisterModuleDependences('sale', 'onManagerCouponDelete', $this->MODULE_ID, 'cConveadTracker', 'updateCartWithCoupon');
+        
         \Bitrix\Main\EventManager::getInstance()->registerEventHandler("sale", "OnSaleOrderSaved", $this->MODULE_ID, "cConveadTracker", "newEventOrderChange");
 
         $this->InstallFiles();
@@ -66,7 +69,11 @@ class platina_conveadtracker extends CModule {
         UnRegisterModuleDependences("sale", "OnBeforeViewedAdd", $this->MODULE_ID, "cConveadTracker", "productView");
         UnRegisterModuleDependences("sale", "OnSaleStatusOrder", $this->MODULE_ID, "cConveadTracker", "orderSetState");
         UnRegisterModuleDependences("sale", "OnSaleBasketSaved", $this->MODULE_ID, "cConveadTracker", "newEventUpdateCart"); 
-        // UnRegisterModuleDependences("sale", "OnSaleBasketItemSetField", $this->MODULE_ID, "cConveadTracker", "newEventSetQtyCart");
+
+        // onManagerCouponApply
+        UnRegisterModuleDependences('sale', 'onManagerCouponAdd', $this->MODULE_ID, 'cConveadTracker', 'updateCartWithCoupon');
+        UnRegisterModuleDependences('sale', 'onManagerCouponDelete', $this->MODULE_ID, 'cConveadTracker', 'updateCartWithCoupon');
+
         \Bitrix\Main\EventManager::getInstance()->unRegisterEventHandler("sale", "OnSaleOrderSaved", $this->MODULE_ID, "cConveadTracker", "newEventOrderChange");
 
         $this->UnInstallFiles();

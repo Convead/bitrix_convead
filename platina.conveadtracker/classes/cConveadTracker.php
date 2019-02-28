@@ -57,6 +57,19 @@ class cConveadTracker {
     }
   }
 
+  public static function updateCartWithCoupon() {  
+    $items = self::getItemsByProperty(array(
+        'FUSER_ID' => CSaleBasket::GetBasketUserID(),
+        'LID' => SITE_ID,
+        'ORDER_ID' => 'NULL',
+        'DELAY' => 'N',
+        'CAN_BUY' => 'Y'
+      )
+    );
+    self::sendUpdateCart($items);
+    return true;
+  }
+
   /* колбек обновления товаров корзины для новых версий */
   public static function newEventUpdateCart($basket) {
     // проверяем, что не включена поддержка старых событий
