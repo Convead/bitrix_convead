@@ -443,7 +443,9 @@ class cConveadTracker {
   }
 
   private static function getDomain() {
-    return !empty($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
+    // Without port
+    $domain = !empty($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
+    return array_shift(explode(':', $domain));
   }
 
   private static function getDetailPageUrl($page) {
