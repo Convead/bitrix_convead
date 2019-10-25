@@ -169,6 +169,11 @@ class cConveadTracker {
     return true;
   }
 
+  public static function prolog() {
+    $_SESSION['VIEWED_PRODUCT'] = 0;
+    unset($_SESSION['VIEWED_ENABLE']);
+  }
+
   /*  колбек для вставки основного кода widget.js */
   public static function head() {
     if (!self::getCurlUri()) return true;
@@ -188,10 +193,6 @@ class cConveadTracker {
       global $APPLICATION;
       $APPLICATION->AddHeadString(self::getHeadScript($app_key), false, true);
     }
-
-    @session_start();
-    $_SESSION['VIEWED_PRODUCT']=0;
-    unset($_SESSION['VIEWED_ENABLE']);
 
     return true;
   }

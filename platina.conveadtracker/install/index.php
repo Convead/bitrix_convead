@@ -28,6 +28,7 @@ class platina_conveadtracker extends CModule {
     public function DoInstall() {
         RegisterModule($this->MODULE_ID);
 
+        RegisterModuleDependences("main", "OnProlog", $this->MODULE_ID, "cConveadTracker", "prolog", "100");
         RegisterModuleDependences("sale", "OnBasketAdd", $this->MODULE_ID, "cConveadTracker", "updateCart", "100");
         RegisterModuleDependences("sale", "OnSaleBasketItemDeleted", $this->MODULE_ID, "cConveadTracker", "updateCart", "100");
         RegisterModuleDependences("sale", "OnSaleComponentOrderComplete", $this->MODULE_ID, "cConveadTracker", "order", "100");
@@ -58,6 +59,8 @@ class platina_conveadtracker extends CModule {
 
     public function DoUninstall() {
         /* очистка от зависимостей предыдущих версий модуля */
+        UnRegisterModuleDependences("main", "OnProlog", $this->MODULE_ID, "cConveadTracker", "prolog");
+
         UnRegisterModuleDependences("sale", "OnSaleOrderSaved", $this->MODULE_ID, "cConveadTracker", "newEventOrder"); 
 
         UnRegisterModuleDependences("sale", "OnBasketAdd", $this->MODULE_ID, "cConveadTracker", "updateCart");
