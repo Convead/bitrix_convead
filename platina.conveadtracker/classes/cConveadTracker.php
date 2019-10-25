@@ -254,7 +254,7 @@ class cConveadTracker {
 
     if (isset($_SESSION['CONVEAD_PRODUCT_ID'])) {
       $product_id = $_SESSION['CONVEAD_PRODUCT_ID'];
-      $name = htmlentities($_SESSION['CONVEAD_PRODUCT_NAME'], ENT_QUOTES);
+      $name = htmlentities($_SESSION['CONVEAD_PRODUCT_NAME'], ENT_QUOTES, SITE_CHARSET);
       $url = $_SESSION['CONVEAD_PRODUCT_URL'];
 
       unset($_SESSION['CONVEAD_PRODUCT_ID']);
