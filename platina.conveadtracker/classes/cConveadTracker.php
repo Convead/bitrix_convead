@@ -199,7 +199,7 @@ class cConveadTracker {
 
   private static function sendPurchase($order_id) {
     $order_data = self::getOrderData($order_id);
-    if (!$order_data) return false;
+    if (!$order_data || empty($order_data->items)) return false;
     
     /* блокировать повторную отправку заказа */
     if (isset($_SESSION['cnv_old_order']) && $_SESSION['cnv_old_order'] == $order_id) return false;
@@ -209,7 +209,7 @@ class cConveadTracker {
     $visitor_info = $order_data->uid ? self::getVisitorInfo($order_data->uid) : array();
     if ($phone_name = self::getPhoneCode() and !empty($_POST[$phone_name])) $visitor_info['phone'] = $_POST[$phone_name];
     if (!$tracker = self::getTracker($order_data->lid, self::getUid($order_data->uid), $order_data->uid, $visitor_info)) return true;
-    if (empty($order_data->items)) return false;
+
     return $tracker->eventOrder($order_data->order_id, $order_data->revenue, $order_data->items, $order_data->state);
   }
 
